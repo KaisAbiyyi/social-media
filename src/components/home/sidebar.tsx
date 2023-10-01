@@ -12,6 +12,17 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 export default function MainSidebar() {
     const router = useRouter()
@@ -27,7 +38,22 @@ export default function MainSidebar() {
                     <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/notifications')}>Notifications</Button>
                     <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/messages')}>Messages</Button>
                     <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/profile')}>Profile</Button>
-                    <Button type="button" variant={"default"} onClick={() => router.push('/home')}>Post</Button>
+                    <Dialog>
+                        <DialogTrigger>
+                            <Button type="button" className="w-full" variant={"default"}>Post</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <Button type="button" variant={'secondary'} className="w-fit">Draft</Button>
+                            </DialogHeader>
+                            <DialogDescription>
+                                <Textarea />
+                            </DialogDescription>
+                            <DialogFooter>
+                                <Button type="button">Post</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </CardContent>
             </Card>
             <div className="flex">

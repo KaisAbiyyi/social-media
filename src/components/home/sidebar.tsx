@@ -1,15 +1,11 @@
 "use client"
-
-import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { useRouter } from "next/navigation";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -21,8 +17,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import Link from "next/link";
 
 export default function MainSidebar() {
     const router = useRouter()
@@ -30,17 +26,17 @@ export default function MainSidebar() {
         <div className="flex flex-col flex-grow gap-6">
             <Card>
                 <CardHeader>
-                    <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/home')}>social-media</Button>
+                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>socal-media</Link>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                    <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/home')}>Home</Button>
-                    <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/explore')}>Explore</Button>
-                    <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/notifications')}>Notifications</Button>
-                    <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/messages')}>Messages</Button>
-                    <Button type="button" variant={"ghost"} className="justify-start w-fit" onClick={() => router.push('/profile')}>Profile</Button>
+                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Home</Link>
+                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Explore</Link>
+                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Notifications</Link>
+                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Messages</Link>
+                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Profile</Link>
                     <Dialog>
-                        <DialogTrigger>
-                            <Button type="button" className="w-full" variant={"default"}>Post</Button>
+                        <DialogTrigger className={buttonVariants({ variant: 'default' })}>
+                            Post
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
@@ -58,8 +54,8 @@ export default function MainSidebar() {
             </Card>
             <div className="flex">
                 <DropdownMenu>
-                    <DropdownMenuTrigger>
-                        <Button variant={"default"} type="button">username</Button>
+                    <DropdownMenuTrigger className={buttonVariants({ variant: "default" })}>
+                        username
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-full">
                         <DropdownMenuItem>Add an existing account</DropdownMenuItem>

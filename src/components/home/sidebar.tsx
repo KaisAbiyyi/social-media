@@ -25,10 +25,10 @@ export default function MainSidebar() {
     return <>
         <div className="flex flex-col flex-grow gap-6">
             <Card>
-                <CardHeader>
+                <CardHeader className="p-4">
                     <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>socal-media</Link>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-4">
+                <CardContent className="flex flex-col gap-4 p-4">
                     <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Home</Link>
                     <Link href="/explore" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Explore</Link>
                     <Link href="/notifications" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Notifications</Link>

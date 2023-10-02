@@ -30,10 +30,10 @@ export default function MainSidebar() {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                     <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Home</Link>
-                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Explore</Link>
-                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Notifications</Link>
-                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Messages</Link>
-                    <Link href="/home" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Profile</Link>
+                    <Link href="/explore" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Explore</Link>
+                    <Link href="/notifications" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Notifications</Link>
+                    <Link href="/messages" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Messages</Link>
+                    <Link href="/profile" className={buttonVariants({ variant: 'ghost', class: 'justify-start w-fit' })}>Profile</Link>
                     <Dialog>
                         <DialogTrigger className={buttonVariants({ variant: 'default' })}>
                             Post

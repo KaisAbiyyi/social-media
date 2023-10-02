@@ -8,7 +8,7 @@ export default function MainLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className="container flex p-4 mx-auto">
+        <div className="container flex gap-4 p-4 mx-auto">
             <MainSidebar />
             <div className="w-1/2">
                 {children}

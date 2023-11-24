@@ -28,8 +28,8 @@ export default function LoginPage() {
         <h1 className="text-6xl font-bold">Happening now</h1>
         <h3 className="mt-10 text-3xl font-bold">Join today.</h3>
         <div className="flex flex-col gap-2 items-center mt-8 w-1/2">
-          <Button type="button" variant={"secondary"} className="w-full" onClick={() => signIn("google", { callbackUrl: "/home" })}>Google Sign in</Button>
-          <Button type="button" variant={"secondary"} className="w-full" onClick={() => signIn("github", { callbackUrl: "/home" })}>Github Sign in</Button>
+          <Button type="button" variant={"secondary"} className="w-full" onClick={() => signIn("google")}>Google Sign in</Button>
+          <Button type="button" variant={"secondary"} className="w-full" onClick={() => signIn("github")}>Github Sign in</Button>
           <Separator className="mt-2" />
           {/* <SignOutDialog /> */}
           <div className="mt-10 flex flex-col w-full gap-4">

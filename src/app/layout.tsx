@@ -3,6 +3,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/providers/theme-provider'
+import { NextAuthProviders } from '@/components/providers/next-auth'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,14 +20,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(inter.className, 'font-sans')}>
-        <ThemeProvider
-          attribute='class'
-          defaultTheme='light'
-          enableSystem={false}
-          storageKey='social-media-theme'
-        >
-          {children}
-        </ThemeProvider>
+        <NextAuthProviders>
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='light'
+            enableSystem={false}
+            storageKey='social-media-theme'
+          >
+            {children}
+          </ThemeProvider>
+        </NextAuthProviders>
       </body>
     </html>
   )

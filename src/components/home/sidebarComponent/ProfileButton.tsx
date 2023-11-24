@@ -2,7 +2,7 @@
 
 import { buttonVariants } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-
+import { signOut } from "next-auth/react"
 export default function ProfileButton() {
     return (
         <DropdownMenu>
@@ -11,7 +11,7 @@ export default function ProfileButton() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-full" align="start">
                 <DropdownMenuItem>Add an existing account</DropdownMenuItem>
-                <DropdownMenuItem>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOut()}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )

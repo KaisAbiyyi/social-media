@@ -7,13 +7,13 @@ import { Separator } from "@/components/ui/separator"
 import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
-const checkAuthStatus = () => {
+const CheckAuthStatus = () => {
   const { data: session } = useSession();
   return !!session; // Check if session exists (true if logged in, false if not)
 };
 
 export default function LoginPage() {
-  const isLoggedIn = checkAuthStatus()
+  const isLoggedIn = CheckAuthStatus()
   const router = useRouter()
 
 

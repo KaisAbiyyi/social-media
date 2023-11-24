@@ -39,8 +39,8 @@ const SignInDialog: FC = () => {
                 <DialogHeader>
                     <div className="flex flex-col gap-4 mt-6">
                         <DialogTitle className="text-xl">Sign in to social-media</DialogTitle>
-                        <Button type="button" variant={"secondary"} onClick={() => signIn("google")}>Google Sign in</Button>
-                        <Button type="button" variant={"secondary"} onClick={() => signIn("github")}>Github Sign in</Button>
+                        <Button type="button" variant={"secondary"} onClick={() => signIn("google", { callbackUrl: "/home" })}>Google Sign in</Button>
+                        <Button type="button" variant={"secondary"} onClick={() => signIn("github", { callbackUrl: "/home" })}>Github Sign in</Button>
                         <Separator />
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit((values: z.infer<typeof formSchema>) => signIn("credentials", { email: values.email, password: values.password, callbackUrl: '/home' }))} className="space-y-8">

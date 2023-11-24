@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
+import { MoreHorizontal } from "lucide-react";
 
 export default function MainAside() {
     return <>
@@ -30,8 +31,10 @@ export default function MainAside() {
                             </CardHeader>
                             <CardFooter className="p-4">
                                 <DropdownMenu>
-                                    <DropdownMenuTrigger className={buttonVariants({ variant: 'default' })}>...</DropdownMenuTrigger>
-                                    <DropdownMenuContent>
+                                    <DropdownMenuTrigger className={buttonVariants()}>
+                                        <MoreHorizontal size={12} />
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
                                         <DropdownMenuItem>Not interested in this</DropdownMenuItem>
                                         <DropdownMenuItem>This trend is harmfull or spammy</DropdownMenuItem>
                                     </DropdownMenuContent>

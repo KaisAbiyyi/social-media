@@ -40,11 +40,7 @@ export const authOptions: NextAuthOptions = {
 
                 if (!user) return null
 
-
-                console.log(user.password)
-
                 const isPasswordValid = compareSync(credentials.password, user.password ?? '')
-                console.log(isPasswordValid)
 
                 if (!isPasswordValid) return null
 

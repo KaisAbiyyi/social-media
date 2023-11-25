@@ -13,11 +13,6 @@ const CheckAuthStatus = () => {
 };
 
 export default function LoginPage() {
-  const isLoggedIn = CheckAuthStatus()
-  const router = useRouter()
-
-
-  if (isLoggedIn) return router.push('/home')
 
   return <>
     <div className="flex container mx-auto h-screen items-center">

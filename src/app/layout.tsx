@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { NextAuthProviders } from '@/components/providers/next-auth'
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,6 +29,7 @@ export default function RootLayout({
             storageKey='social-media-theme'
           >
             {children}
+            <Toaster />
           </ThemeProvider>
         </NextAuthProviders>
       </body>

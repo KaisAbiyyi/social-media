@@ -11,7 +11,7 @@ export default function ProfileButton() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-full" align="start">
                 <DropdownMenuItem>Add an existing account</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => signOut()}>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )

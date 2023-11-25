@@ -1,6 +1,6 @@
 "use client"
 
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Button, buttonVariants } from "../ui/button";
 import { signIn } from "next-auth/react";
@@ -10,7 +10,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
-import SignOutDialog from "./SignOutDialog";
+import SignOutDialog from "./SignUpDialog";
+import { useRouter } from "next/navigation";
+import { useToast } from "../ui/use-toast";
+import { ToastAction } from "../ui/toast";
 
 const formSchema = z.object({
     email: z.string().min(1, {
@@ -22,6 +25,9 @@ const formSchema = z.object({
 })
 
 const SignInDialog: FC = () => {
+    const router = useRouter()
+    const [open, setOpen] = useState<boolean>(false)
+    const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -30,7 +36,7 @@ const SignInDialog: FC = () => {
         },
     })
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger className={buttonVariants({ variant: "outline" })}>Sign in</DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -39,11 +45,24 @@ const SignInDialog: FC = () => {
                 <DialogHeader>
                     <div className="flex flex-col gap-4 mt-6">
                         <DialogTitle className="text-xl">Sign in to social-media</DialogTitle>
-                        <Button type="button" variant={"secondary"} onClick={() => signIn("google")}>Google Sign in</Button>
-                        <Button type="button" variant={"secondary"} onClick={() => signIn("github")}>Github Sign in</Button>
+                        <Button type="button" variant={"secondary"} onClick={() => signIn("google", { callbackUrl: "/home" })}>Google Sign in</Button>
+                        <Button type="button" variant={"secondary"} onClick={() => signIn("github", { callbackUrl: "/home" })}>Github Sign in</Button>
                         <Separator />
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit((values: z.infer<typeof formSchema>) => signIn("credentials", { email: values.email, password: values.password }))} className="space-y-8">
+                            <form onSubmit={form.handleSubmit(async (values: z.infer<typeof formSchema>) => {
+                                const login = await signIn("credentials", { email: values.email, password: values.password, redirect: false })
+                                if (login?.ok) {
+                                    router.push('/home')
+                                } else {
+                                    toast({
+                                        title: "Something went wrong",
+                                        description: "Email or password incorrect",
+                                        action: <ToastAction altText="Try again">Try again</ToastAction>,
+                                        variant: "destructive",
+                                    })
+
+                                }
+                            })} className="space-y-8">
                                 <FormField
                                     control={form.control}
                                     name="email"

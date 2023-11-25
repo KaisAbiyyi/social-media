@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { buttonVariants } from "../ui/button";
 
-const SignOutDialog: FC = () => {
+const SignUpDialog: FC = () => {
     return (
         <Dialog>
             <DialogTrigger className={buttonVariants({ className: "w-full" })}>Create account</DialogTrigger>
@@ -19,4 +19,4 @@ const SignOutDialog: FC = () => {
     )
 }
 
-export default SignOutDialog
+export default SignUpDialog

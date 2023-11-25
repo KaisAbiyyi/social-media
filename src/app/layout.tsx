@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { NextAuthProviders } from '@/components/providers/next-auth'
 import { Toaster } from '@/components/ui/toaster'
+import TanstackQueryProvider from '@/components/providers/tanstack-query'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,17 +22,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(inter.className, 'font-sans')}>
-        <NextAuthProviders>
-          <ThemeProvider
-            attribute='class'
-            defaultTheme='light'
-            enableSystem={false}
-            storageKey='social-media-theme'
-          >
-            {children}
-            <Toaster />
-          </ThemeProvider>
-        </NextAuthProviders>
+        <TanstackQueryProvider>
+          <NextAuthProviders>
+            <ThemeProvider
+              attribute='class'
+              defaultTheme='light'
+              enableSystem={false}
+              storageKey='social-media-theme'
+            >
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </NextAuthProviders>
+        </TanstackQueryProvider>
       </body>
     </html>
   )

@@ -4,7 +4,8 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, User } from '@prisma/client'
+import { generateRandomNumberString } from '@/lib/utils'
 const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
@@ -47,7 +48,8 @@ export const authOptions: NextAuthOptions = {
                 return {
                     id: user.id,
                     email: user.email,
-                    name: user.name
+                    name: user.name,
+                    username: user.username
                 }
             }
         }),
@@ -60,6 +62,41 @@ export const authOptions: NextAuthOptions = {
             clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? ""
         })
     ],
+    events: {
+        signIn: async ({ user, isNewUser }) => {
+            if (isNewUser) {
+                const updateUser = await prisma.user.update({
+                    where: {
+                        email: user.email ?? ""
+                    },
+                    data: {
+                        username: user.name?.toLowerCase().replaceAll(' ', '') + generateRandomNumberString(4)
+                    }
+                })
+            }
+        }
+    },
+    callbacks: {
+        session: ({ session, token }) => {
+            return {
+                ...session,
+                user: {
+                    ...session.user,
+                    username: token.username
+                }
+            }
+        },
+        jwt: ({ token, user }) => {
+            if (user) {
+                const u = user as unknown as User
+                return {
+                    ...token,
+                    username: u.username
+                }
+            }
+            return token
+        }
+    },
     pages: {
         signIn: '/'
     },

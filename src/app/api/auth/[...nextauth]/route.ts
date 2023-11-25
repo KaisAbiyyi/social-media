@@ -1,15 +1,17 @@
-import { prisma } from '@/lib/db'
+import { PrismaClient } from '@prisma/client'
 import { compareSync } from 'bcrypt'
 import NextAuth, { type NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
-import { redirect } from 'next/navigation'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
+import { prisma } from '@/lib/db'
 
 export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt"
     },
+    adapter: PrismaAdapter(prisma),
     providers: [
         CredentialsProvider({
             name: "Sign in",

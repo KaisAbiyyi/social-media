@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { compareSync } from 'bcrypt'
 import NextAuth, { type NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
@@ -12,6 +11,7 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt"
     },
     adapter: PrismaAdapter(prisma),
+    secret: process.env.NEXTAUTH_SECRET,
     providers: [
         CredentialsProvider({
             name: "Sign in",

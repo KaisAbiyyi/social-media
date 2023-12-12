@@ -55,7 +55,7 @@ const PostsList: FC = () => {
 
     return (<>
         {data.map((tweet: Tweet) => (
-            <Card className="flex">
+            <Card className="flex" key={tweet.id}>
                 <CardHeader className="p-2">
                     <Avatar>
                         <AvatarImage src={tweet.User.image ?? ''} />

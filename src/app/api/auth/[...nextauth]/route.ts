@@ -82,6 +82,7 @@ export const authOptions: NextAuthOptions = {
                 ...session,
                 user: {
                     ...session.user,
+                    id: token.id,
                     username: token.username
                 }
             }
@@ -91,6 +92,7 @@ export const authOptions: NextAuthOptions = {
                 const u = user as unknown as User
                 return {
                     ...token,
+                    id: u.id,
                     username: u.username
                 }
             }

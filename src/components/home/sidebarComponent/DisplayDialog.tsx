@@ -7,8 +7,6 @@ import { PenSquare } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import React from 'react'
 
-interface Props { }
-
 const DisplayDialog = () => {
     const { setTheme, theme } = useTheme()
     return (

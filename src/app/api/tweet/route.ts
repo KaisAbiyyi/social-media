@@ -5,6 +5,9 @@ export async function GET() {
     const data = await prisma.tweet.findMany({
         include: {
             User: true
+        },
+        orderBy: {
+            createdAt: "desc"
         }
     })
 

@@ -18,7 +18,7 @@ export default function MainSidebar() {
                 <CardHeader className="p-4">
                     <Link href="/home" className={buttonVariants({ variant: 'default', class: 'justify-start w-fit !text-lg font-semibold' })}>socal-media</Link>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-4 py-4">
+                <CardContent className="flex flex-col gap-4 px-2 py-4">
                     <Link href="/home" className={buttonVariants({ variant: 'ghost', size: "lg", class: 'justify-start w-fit gap-4' })}>
                         <Home />
                         <span className="text-lg font-semibold">Home</span>

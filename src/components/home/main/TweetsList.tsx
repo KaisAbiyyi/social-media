@@ -25,6 +25,7 @@ import { ToastAction } from "@/components/ui/toast";
 import SpinnerLoader from "@/components/ui/spinner";
 import { Prisma } from "@prisma/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ProfileCard from "./ProfileCard";
 
 type Tweet = Prisma.TweetGetPayload<{
     include: {
@@ -51,31 +52,32 @@ const PostsList: FC = () => {
         })
     }
 
-    if (isPending) return <SpinnerLoader />
+    if (isPending) return (
+        <div className="flex flex-col items-center">
+            <SpinnerLoader />
+        </div>
+    )
 
     return (<>
         {data.map((tweet: Tweet) => (
             <Card className="flex" key={tweet.id}>
-                <CardHeader className="p-2">
-                    <Avatar>
-                        <AvatarImage src={tweet.User.image ?? ''} />
-                        <AvatarFallback>{tweet.User.name?.at(0)?.toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                <CardHeader className="p-4">
+                    <ProfileCard avatar={tweet.User.image as string} trigger="avatar" name={tweet.User.name as string} username={tweet.User.username as string} />
                 </CardHeader>
                 <div className="flex flex-col flex-grow">
-                    <CardHeader className="flex flex-row space-y-0 p-2 !items-center justify-between">
+                    <CardHeader className="flex flex-row space-y-0 px-4 py-4 !items-center justify-between">
                         <div className="flex gap-4 items-center">
-                            <CardTitle className="text-base font-bold p-0 m-0">{tweet.User.name}</CardTitle>
-                            <CardDescription>@{tweet.User.username}</CardDescription>
+                            <ProfileCard avatar={tweet.User.image as string} trigger="name" name={tweet.User.name as string} username={tweet.User.username as string} />
+                            <ProfileCard avatar={tweet.User.image as string} trigger="username" name={tweet.User.name as string} username={tweet.User.username as string} />
                         </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", size: "sm" })}><MoreHorizontal /></DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem className="font-semibold">Unfollow @username</DropdownMenuItem>
+                                <DropdownMenuItem className="font-semibold">Unfollow @{tweet.User.username}</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </CardHeader>
-                    <CardContent className="p-2 pb-4">
+                    <CardContent className="px-4 pb-4">
                         <p>{tweet.text}</p>
                     </CardContent>
                 </div>

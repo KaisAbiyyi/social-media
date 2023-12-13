@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import SpinnerLoader from "@/components/ui/spinner";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { FC, FormEvent, useState } from "react";
@@ -23,11 +23,15 @@ type TweetType = {
 
 const PostCard: FC<PostCardProps> = () => {
     const [text, setText] = useState<string>("")
+    const queryClient = useQueryClient()
     const { data, status } = useSession()
     const { toast } = useToast()
     const { mutate: CreateNewPost, isPending } = useMutation({
         mutationFn: async ({ text, userId }: TweetType) => await axios.post("/api/tweet", { text, userId }),
-        onSuccess: (data) => setText(""),
+        onSuccess: (data) => {
+            setText("")
+            queryClient.invalidateQueries({ queryKey: ['getTweets'] })
+        },
         onError: (err: any) => {
             toast({
                 title: "Something went wrong",

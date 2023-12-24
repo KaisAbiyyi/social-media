@@ -16,8 +16,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { Bookmark, Heart, MessageCircle, MoreHorizontal } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
@@ -57,6 +57,7 @@ const PostsList: FC = () => {
             <SpinnerLoader />
         </div>
     )
+    const isLiked = false
 
     return (<>
         {data.map((tweet: Tweet) => (
@@ -80,6 +81,20 @@ const PostsList: FC = () => {
                     <CardContent className="px-4 pb-4">
                         <p>{tweet.text}</p>
                     </CardContent>
+                    <CardFooter className="px-4 pb-4 flex gap-4">
+                        <Button type="button" variant={"ghost"} size="sm" className="p-2 flex gap-2">
+                            <MessageCircle size={16} />
+                            <span>12k</span>
+                        </Button>
+                        <Button type="button" variant={"ghost"} size="sm" className="p-2 flex gap-2">
+                            <Heart fill={isLiked ? "#e11d48" : "transparent"} color={isLiked ? "#e11d48" : "currentColor"} size={16} />
+                            <span>12k</span>
+                        </Button>
+                        <Button type="button" variant={"ghost"} size="sm" className="p-2 flex gap-2">
+                            <Bookmark size={16} />
+                            <span>12k</span>
+                        </Button>
+                    </CardFooter>
                 </div>
             </Card>
         ))}

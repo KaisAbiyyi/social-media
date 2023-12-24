@@ -7,6 +7,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { PrismaClient, User } from '@prisma/client'
 import { generateRandomNumberString } from '@/lib/utils'
 const prisma = new PrismaClient()
+const randomNumber = generateRandomNumberString(4)
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -64,16 +65,15 @@ export const authOptions: NextAuthOptions = {
     ],
     events: {
         signIn: async ({ user, isNewUser }) => {
-            if (isNewUser) {
-                const updateUser = await prisma.user.update({
-                    where: {
-                        email: user.email ?? ""
-                    },
-                    data: {
-                        username: user.name?.toLowerCase().replaceAll(' ', '') + generateRandomNumberString(4)
-                    }
-                })
-            }
+            await prisma.user.update({
+                where: {
+                    email: user.email ?? "",
+                    username: null ?? undefined
+                },
+                data: {
+                    username: user.name?.toLowerCase().replaceAll(' ', '') + randomNumber
+                }
+            })
         }
     },
     callbacks: {
@@ -83,7 +83,7 @@ export const authOptions: NextAuthOptions = {
                 user: {
                     ...session.user,
                     id: token.id,
-                    username: token.username
+                    username: token.username ?? token.name?.toLowerCase().replaceAll(' ', '') + randomNumber
                 }
             }
         },
@@ -93,7 +93,7 @@ export const authOptions: NextAuthOptions = {
                 return {
                     ...token,
                     id: u.id,
-                    username: u.username
+                    username: u.username ?? u.name?.toLowerCase().replaceAll(' ', '') + randomNumber
                 }
             }
             return token

@@ -15,9 +15,9 @@ export default function ProfileButton() {
                         <AvatarImage src={data?.user.image ?? ''} />
                         <AvatarFallback>{data?.user.name?.at(0)?.toUpperCase()}</AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col text-start">
                         <h1 className="text-lg font-semibold">{data?.user?.name}</h1>
-                        <span className="text-sm">{data?.user?.username}</span>
+                        <span className="text-sm opacity-80">{data?.user?.username}</span>
                     </div>
                 </div>
                 <MoreHorizontal />

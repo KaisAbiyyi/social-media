@@ -1,15 +1,66 @@
 import { prisma } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { Like, Prisma } from "@prisma/client";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-    const data = await prisma.tweet.findMany({
+export type tweetsType = {
+    id: string;
+    userId: string;
+    text: string;
+    createdAt: Date;
+    updatedAt: Date;
+    User: {
+        id: string;
+        name: string;
+        image: string;
+        username: string;
+        email: string;
+    },
+    LikeAmount: number;
+    Liked: boolean
+}
+
+type Tweet = Prisma.TweetGetPayload<{
+    include: {
+        User: true,
+        Like: true
+    }
+}>
+
+
+export async function GET(req: NextRequest) {
+    const session = await getToken({ req })
+
+    const tweets = await prisma.tweet.findMany({
         include: {
-            User: true
+            User: true,
+            Like: true
         },
         orderBy: {
             createdAt: "desc"
         }
     })
+
+
+
+    const data: tweetsType[] = tweets.map((item: Tweet) => (
+        {
+            id: item.id,
+            text: item.text,
+            userId: item.userId,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            User: {
+                id: item.User.id,
+                image: item.User.image || '',
+                name: item.User.name || '',
+                username: item.User.username || '',
+                email: item.User.email || ''
+            },
+            LikeAmount: item.Like.length,
+            Liked: !!(item.Like.find((item: Like) => item.userId === session?.id))
+        }
+    ))
 
     return NextResponse.json({
         success: true,

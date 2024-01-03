@@ -65,10 +65,9 @@ export const authOptions: NextAuthOptions = {
     ],
     events: {
         signIn: async ({ user, isNewUser }) => {
-            await prisma.user.update({
+            const findUser = await prisma.user.update({
                 where: {
                     email: user.email ?? "",
-                    username: null ?? undefined
                 },
                 data: {
                     username: user.name?.toLowerCase().replaceAll(' ', '') + randomNumber

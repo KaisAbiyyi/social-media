@@ -17,7 +17,7 @@ type ProfileCardProps = {
     avatar: string
 }
 
-const ProfileCard = ({ trigger, name, username, avatar }: ProfileCardProps) => {
+const ProfileCard: FC<ProfileCardProps> = ({ trigger, name, username, avatar }) => {
     return (<>
         <HoverCard>
             <HoverCardTrigger asChild>

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { Like, Prisma } from "@prisma/client";
+import { Bookmark, Like, Prisma, Repost } from "@prisma/client";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,13 +17,18 @@ export type tweetsType = {
         email: string;
     },
     LikeAmount: number;
-    Liked: boolean
+    Liked: boolean;
+    Bookmarked: boolean;
+    RepostAmount: number;
+    Reposted: boolean;
 }
 
 type Tweet = Prisma.TweetGetPayload<{
     include: {
         User: true,
-        Like: true
+        Like: true,
+        Bookmark: true,
+        Repost: true
     }
 }>
 
@@ -34,7 +39,9 @@ export async function GET(req: NextRequest) {
     const tweets = await prisma.tweet.findMany({
         include: {
             User: true,
-            Like: true
+            Like: true,
+            Bookmark: true,
+            Repost: true,
         },
         orderBy: {
             createdAt: "desc"
@@ -58,7 +65,10 @@ export async function GET(req: NextRequest) {
                 email: item.User.email || ''
             },
             LikeAmount: item.Like.length,
-            Liked: !!(item.Like.find((item: Like) => item.userId === session?.id))
+            Liked: !!(item.Like.find((item: Like) => item.userId === session?.id)),
+            Bookmarked: !!(item.Bookmark.find((item: Bookmark) => item.userId === session?.id)),
+            RepostAmount: item.Repost.length,
+            Reposted: !!(item.Repost.find((item: Repost) => item.userId === session?.id)),
         }
     ))
 

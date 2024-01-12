@@ -1,6 +1,5 @@
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
-import ReactTextareaAutosize from 'react-textarea-autosize'
+import { buttonVariants } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { FC } from "react";
 import PostCard from "../main/TweetCard";
 
@@ -11,7 +10,7 @@ const PostButton: FC = () => {
                 Post
             </DialogTrigger>
             <DialogContent className="p-0 pt-12">
-                <PostCard/>
+                <PostCard />
             </DialogContent>
         </Dialog>
     )

@@ -16,9 +16,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Bookmark, Heart, MessageCircle, MoreHorizontal } from "lucide-react";
+import { Bookmark, Heart, MessageCircle, MoreHorizontal, PencilLine, RefreshCcw } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -26,10 +26,16 @@ import SpinnerLoader from "@/components/ui/spinner";
 import ProfileCard from "./ProfileCard";
 import { Separator } from "@/components/ui/separator";
 import { tweetsType } from "@/app/api/tweet/route";
+import { useSession } from "next-auth/react";
+import LikeButton from "./components/LikeButton";
+import BookmarkButton from "./components/BookmarkButton";
+import RepostButton from "./components/RepostButton";
+import QuoteButton from "./components/QuoteButton";
 
 
 const TweetsList: FC = () => {
     const { toast } = useToast()
+    const { data: user, status } = useSession()
     const { data, isPending, isError } = useQuery({
         queryKey: ["getTweets"],
         queryFn: async () => {
@@ -51,7 +57,6 @@ const TweetsList: FC = () => {
             <SpinnerLoader />
         </div>
     )
-    const isLiked = false
 
     return (<>
         <Card>
@@ -77,19 +82,39 @@ const TweetsList: FC = () => {
                             <CardContent className="px-4 pb-4">
                                 <p>{tweet.text}</p>
                             </CardContent>
-                            <CardFooter className="px-4 pb-4 flex gap-4">
-                                <Button type="button" variant={"ghost"} size="sm" className="p-2 flex gap-2">
-                                    <MessageCircle size={16} />
-                                    <span>12k</span>
-                                </Button>
-                                <Button type="button" variant={"ghost"} size="sm" className="p-2 flex gap-2">
-                                    <Heart fill={tweet.Liked ? "#e11d48" : "transparent"} color={tweet.Liked ? "#e11d48" : "currentColor"} size={16} />
-                                    <span className={tweet.Liked ? "text-[#e11d48]" : ""}>{tweet.LikeAmount}</span>
-                                </Button>
-                                <Button type="button" variant={"ghost"} size="sm" className="p-2 flex gap-2">
-                                    <Bookmark size={16} />
-                                    <span>12k</span>
-                                </Button>
+                            <CardFooter className="px-4 pb-4 flex justify-between gap-4">
+                                <div className="flex gap-4">
+                                    <Button type="button" variant={"ghost"} size="sm" className="p-2 flex gap-2">
+                                        <MessageCircle size={16} />
+                                        <span>12k</span>
+                                    </Button>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger
+                                            className={buttonVariants({ variant: "ghost", size: "sm", className: "p-2 flex gap-2" })}>
+                                            <RefreshCcw className={tweet.Reposted ? " text-green-500" : ""} size={16} />
+                                            <span>{tweet.RepostAmount}</span>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <RepostButton
+                                                userId={user?.user.id as string}
+                                                tweetId={tweet.id}
+                                                Reposted={tweet.Reposted} />
+                                            <QuoteButton
+                                                userId={user?.user.id as string}
+                                                tweetId={tweet.id} />
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                    <LikeButton
+                                        userId={user?.user.id as string}
+                                        tweetId={tweet.id}
+                                        LikeAmount={tweet.LikeAmount}
+                                        Liked={tweet.Liked}
+                                    />
+                                </div>
+                                <BookmarkButton
+                                    userId={user?.user.id as string}
+                                    tweetId={tweet.id}
+                                    Bookmarked={tweet.Bookmarked} />
                             </CardFooter>
                         </div>
                     </div>

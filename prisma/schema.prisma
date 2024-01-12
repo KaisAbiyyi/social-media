@@ -53,7 +53,6 @@ model User {
   Bookmark      Bookmark[]
   Reply         Reply[]
   Repost        Repost[]
-  Quote         Quote[]
 }
 
 model VerificationToken {
@@ -75,7 +74,9 @@ model Tweet {
   Bookmark  Bookmark[]
   Reply     Reply[]
   Repost    Repost[]
-  Quote     Quote[]
+  quotedId  String?    @map("tweetId")
+  quote     Tweet?     @relation("QuotedTweet", fields: [quotedId], references: [id])
+  quotes    Tweet[]    @relation("QuotedTweet")
 }
 
 model Like {
@@ -105,23 +106,14 @@ model Repost {
   createdAt DateTime @default(now())
 }
 
-model Quote {
-  id        String   @id @default(uuid())
-  text      String   @db.Text
-  User      User     @relation(fields: [userId], references: [id])
-  userId    String
-  Tweet     Tweet    @relation(fields: [tweetId], references: [id])
-  tweetId   String
-  createdAt DateTime @default(now())
-}
-
 model Reply {
-  id               String  @id @default(uuid())
-  text             String  @db.Text
-  User             User    @relation(fields: [userId], references: [id])
-  userId           String
-  Tweet            Tweet   @relation(fields: [tweetId], references: [id])
-  tweetId          String
-  replies          Reply[] @relation("replies")
-  repliesRelations Reply[] @relation("replies")
+  id        String  @id @default(uuid())
+  text      String  @db.Text
+  User      User    @relation(fields: [userId], references: [id])
+  userId    String
+  Tweet     Tweet?  @relation(fields: [tweetId], references: [id])
+  tweetId   String?
+  repliedId String? @map("replyId")
+  replied   Reply?  @relation("RepliedReply", fields: [repliedId], references: [id])
+  replies   Reply[] @relation("RepliedReply")
 }

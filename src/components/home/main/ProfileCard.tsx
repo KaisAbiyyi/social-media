@@ -8,32 +8,44 @@ import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 
 type ProfileCardProps = {
     trigger: "name" | "username" | "avatar";
     name: string;
     username: string;
-    avatar: string
+    avatar: string;
+    className?: string;
 }
 
-const ProfileCard: FC<ProfileCardProps> = ({ trigger, name, username, avatar }) => {
+const ProfileCard: FC<ProfileCardProps> = ({ trigger, name, username, avatar, className }) => {
     return (<>
         <HoverCard>
             <HoverCardTrigger asChild>
                 {(
                     () => {
                         if (trigger === "name") {
-                            return (<CardTitle className="text-base font-bold p-0 m-0 hover:underline cursor-pointer">{name}</CardTitle>)
+                            return (
+                                <Link href={`/${username}`}>
+                                    <CardTitle className={cn("text-base font-bold p-0 m-0 hover:underline cursor-pointer", className)}>{name}</CardTitle>
+                                </Link>
+                            )
                         } else if (trigger === "avatar") {
                             return (
-                                <Avatar className="hover:opacity-80 transition ease-in cursor-pointer">
-                                    <AvatarImage src={avatar} />
-                                    <AvatarFallback>{name?.at(0)?.toUpperCase()}</AvatarFallback>
-                                </Avatar>
+                                <Link href={`/${username}`}>
+                                    <Avatar className={cn("hover:opacity-80 transition ease-in cursor-pointer", className)}>
+                                        <AvatarImage src={avatar} />
+                                        <AvatarFallback>{name?.at(0)?.toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                </Link>
                             )
                         } else {
-                            return (<CardDescription className="cursor-pointer">@{username}</CardDescription>)
+                            return (
+                                <Link href={`/${username}`}>
+                                    <CardDescription className={cn("cursor-pointer", className)}>@{username}</CardDescription>
+                                </Link>
+                            )
                         }
                     })()
                 }

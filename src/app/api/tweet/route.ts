@@ -9,6 +9,12 @@ export type tweetsType = {
     text: string;
     createdAt: Date;
     updatedAt: Date;
+    LikeAmount: number;
+    Liked: boolean;
+    Bookmarked: boolean;
+    RepostAmount: number;
+    Reposted: boolean;
+    ReplyAmount: number;
     User: {
         id: string;
         name: string;
@@ -16,11 +22,16 @@ export type tweetsType = {
         username: string;
         email: string;
     },
-    LikeAmount: number;
-    Liked: boolean;
-    Bookmarked: boolean;
-    RepostAmount: number;
-    Reposted: boolean;
+    quote?: {
+        text: string;
+        createdAt: Date;
+        updatedAt: Date;
+        User: {
+            name: string;
+            image: string;
+            username: string;
+        }
+    } | null,
 }
 
 type Tweet = Prisma.TweetGetPayload<{
@@ -28,7 +39,13 @@ type Tweet = Prisma.TweetGetPayload<{
         User: true,
         Like: true,
         Bookmark: true,
-        Repost: true
+        Repost: true,
+        Reply: true,
+        quote: {
+            include: {
+                User: true
+            }
+        }
     }
 }>
 
@@ -42,13 +59,17 @@ export async function GET(req: NextRequest) {
             Like: true,
             Bookmark: true,
             Repost: true,
+            Reply: true,
+            quote: {
+                include: {
+                    User: true
+                }
+            }
         },
         orderBy: {
             createdAt: "desc"
         }
     })
-
-
 
     const data: tweetsType[] = tweets.map((item: Tweet) => (
         {
@@ -57,6 +78,12 @@ export async function GET(req: NextRequest) {
             userId: item.userId,
             createdAt: item.createdAt,
             updatedAt: item.updatedAt,
+            LikeAmount: item.Like.length,
+            Liked: !!(item.Like.find((item: Like) => item.userId === session?.id)),
+            Bookmarked: !!(item.Bookmark.find((item: Bookmark) => item.userId === session?.id)),
+            RepostAmount: item.Repost.length,
+            Reposted: !!(item.Repost.find((item: Repost) => item.userId === session?.id)),
+            ReplyAmount: item.Reply.length,
             User: {
                 id: item.User.id,
                 image: item.User.image || '',
@@ -64,11 +91,16 @@ export async function GET(req: NextRequest) {
                 username: item.User.username || '',
                 email: item.User.email || ''
             },
-            LikeAmount: item.Like.length,
-            Liked: !!(item.Like.find((item: Like) => item.userId === session?.id)),
-            Bookmarked: !!(item.Bookmark.find((item: Bookmark) => item.userId === session?.id)),
-            RepostAmount: item.Repost.length,
-            Reposted: !!(item.Repost.find((item: Repost) => item.userId === session?.id)),
+            quote: item.quote ? {
+                text: item.quote?.text as string,
+                createdAt: item.quote?.createdAt as Date,
+                updatedAt: item.quote?.updatedAt as Date,
+                User: {
+                    name: item.quote?.User.name as string,
+                    username: item.quote?.User.username as string,
+                    image: item.quote?.User.image as string
+                }
+            } : null,
         }
     ))
 
@@ -81,9 +113,8 @@ export async function GET(req: NextRequest) {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { text, userId } = body
+        const { text, userId, userTweetId, tweetId } = body
         const requiredFields = ["text", "userId"];
-
         const errResponse = requiredFields
             .filter(field => !body[field])
             .map(field => ({ error: `${field.charAt(0).toUpperCase() + field.slice(1)} cannot be null` }));
@@ -92,30 +123,59 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, message: errResponse }, { status: 403 });
         }
 
-        const user = await prisma.user.findUnique({
-            where: {
-                id: userId,
-            }
-        })
 
-        if (!user) {
+        if (userTweetId && tweetId) {
+            const tweet = await prisma.tweet.findFirst({
+                where: {
+                    userId: userTweetId,
+                    id: tweetId
+                }
+            })
+            if (!tweet) {
+                return NextResponse.json({
+                    success: false,
+                    message: "Invalid Tweet ID",
+                }, { status: 404 })
+            }
+
+            const quote = await prisma.tweet.create({
+                data: {
+                    quotedId: tweetId,
+                    text,
+                    userId,
+                }
+            })
+
             return NextResponse.json({
-                success: false,
-                message: "Invalid user id"
-            }, { status: 403 });
+                success: true,
+                message: "Quote created",
+            }, { status: 201 })
+        } else {
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: userId,
+                }
+            })
+            if (!user) {
+                return NextResponse.json({
+                    success: false,
+                    message: "Invalid user id"
+                }, { status: 403 });
+            }
+
+            const tweet = await prisma.tweet.create({
+                data: {
+                    text,
+                    userId
+                }
+            })
+
+            return NextResponse.json({
+                success: true,
+                message: "Tweet posted"
+            }, { status: 201 })
         }
 
-        const tweet = await prisma.tweet.create({
-            data: {
-                text,
-                userId
-            }
-        })
-
-        return NextResponse.json({
-            success: true,
-            message: "Tweet posted"
-        }, { status: 201 })
 
     } catch (error) {
         return NextResponse.json({

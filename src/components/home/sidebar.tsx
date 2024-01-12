@@ -9,9 +9,11 @@ import ProfileButton from "./sidebarComponent/ProfileButton";
 import PostButton from "./sidebarComponent/PostButton";
 import MoreButton from "./sidebarComponent/MoreButton";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 export default function MainSidebar() {
     const { data: session } = useSession()
+    const router = usePathname()
     return <>
         <div className="flex flex-col flex-grow gap-6">
             <Card>

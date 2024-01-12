@@ -1,7 +1,7 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { FC } from "react";
-import PostCard from "../main/TweetCard";
+import TweetCard from "../main/TweetCard";
 
 const PostButton: FC = () => {
     return (
@@ -9,8 +9,8 @@ const PostButton: FC = () => {
             <DialogTrigger className={buttonVariants({ variant: 'default' })}>
                 Post
             </DialogTrigger>
-            <DialogContent className="p-0 pt-12">
-                <PostCard />
+            <DialogContent className="p-0 pt-12 bg-secondary">
+                <TweetCard />
             </DialogContent>
         </Dialog>
     )

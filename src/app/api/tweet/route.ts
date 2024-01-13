@@ -86,10 +86,10 @@ export async function GET(req: NextRequest) {
             ReplyAmount: item.Reply.length,
             User: {
                 id: item.User.id,
-                image: item.User.image || '',
-                name: item.User.name || '',
-                username: item.User.username || '',
-                email: item.User.email || ''
+                image: item.User.image as string,
+                name: item.User.name as string,
+                username: item.User.username as string,
+                email: item.User.email as string
             },
             quote: item.quote ? {
                 text: item.quote?.text as string,

@@ -65,14 +65,22 @@ export const authOptions: NextAuthOptions = {
     ],
     events: {
         signIn: async ({ user, isNewUser }) => {
-            const findUser = await prisma.user.update({
+            const findUser = await prisma.user.findFirst({
                 where: {
-                    email: user.email ?? "",
+                    email: user.email as string
                 },
-                data: {
-                    username: user.name?.toLowerCase().replaceAll(' ', '') + randomNumber
-                }
             })
+
+            if (findUser?.username === null || findUser?.username === "" || findUser?.username === undefined) {
+                await prisma.user.update({
+                    where: {
+                        email: findUser?.email as string,
+                    },
+                    data: {
+                        username: user.name?.toLowerCase().replaceAll(" ", "") + randomNumber
+                    }
+                })
+            }
         }
     },
     callbacks: {

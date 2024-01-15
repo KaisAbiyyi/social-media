@@ -31,6 +31,7 @@ type TweetType = {
 
 const QuoteButton: FC<QuoteButtonProps> = ({ userTweetId, tweetId, userImage, userName, userUsername, userText }) => {
     const [text, setText] = useState<string>("")
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false)
     const queryClient = useQueryClient()
     const { data, status } = useSession()
     const { toast } = useToast()
@@ -39,6 +40,7 @@ const QuoteButton: FC<QuoteButtonProps> = ({ userTweetId, tweetId, userImage, us
         onSuccess: (data) => {
             setText("")
             queryClient.invalidateQueries({ queryKey: ['getTweets'] })
+            setDialogOpen(false)
         },
         onError: (err: any) => {
             toast({
@@ -51,7 +53,7 @@ const QuoteButton: FC<QuoteButtonProps> = ({ userTweetId, tweetId, userImage, us
     })
 
     return (
-        <Dialog>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger className="p-2 flex items-center gap-2 relative cursor-pointer w-full hover:bg-accent select-none rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
                 <PencilLine size={16} />
                 <span>Quote</span>

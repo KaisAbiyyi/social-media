@@ -63,7 +63,8 @@ const TweetsList: FC = () => {
         {data.length > 0 &&
             <Card>
                 {data.map((tweet: tweetsType, index: number, array: tweetsType[]) => (
-                    <Link href={`/${tweet.User.username}/status/${tweet.id}`} className="relative" key={tweet.id}>
+                    <div className="relative" key={tweet.id}>
+                        <Link href={`/${tweet.User.username}/status/${tweet.id}`} className="absolute z-0 w-full h-full" />
                         <div className="flex">
                             <CardHeader className="p-4">
                                 <ProfileCard className="z-40" avatar={tweet.User.image as string} trigger="avatar" name={tweet.User.name as string} username={tweet.User.username as string} />
@@ -106,7 +107,7 @@ const TweetsList: FC = () => {
                                         </Card>
                                     }
                                 </CardContent>
-                                <CardFooter className="px-4 pb-4 flex justify-between gap-4">
+                                <CardFooter className="px-4 pb-4 flex justify-between gap-4 z-50">
                                     <div className="flex gap-4">
                                         <ReplyButton
                                             tweetId={tweet.id}
@@ -153,7 +154,7 @@ const TweetsList: FC = () => {
                             <Separator /> :
                             ""
                         }
-                    </Link>
+                    </div>
                 ))}
             </Card >
         }

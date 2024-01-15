@@ -81,7 +81,7 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger className={buttonVariants({ variant: "ghost", size: "sm", className: "p-2 flex gap-2" })}>
+            <DialogTrigger className={buttonVariants({ variant: "ghost", size: "sm", className: "p-2 flex gap-2 !z-40" })}>
                 <MessageCircle size={16} />
                 <span>{tweetReplyAmount}</span>
             </DialogTrigger>

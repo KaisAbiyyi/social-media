@@ -87,7 +87,17 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
             {ProfileTweet.length > 0 &&
                 <Card>
                     {ProfileTweet.map((tweet: tweetsType, index: number, array: tweetsType[]) => (
-                        <Link href={`/${tweet.User.username}/status/${tweet.id}`} className="relative" key={tweet.id}>
+                        <div className="relative flex flex-col" key={tweet.id}>
+                            {tweet.Reposting &&
+                                <CardDescription className="flex gap-2 items-center p-1 italic font-semibold text-sm">
+                                    <RefreshCcw size={12} />
+                                    <span>
+                                        {tweet.User.username}
+                                    </span>
+                                    <span>reposted</span>
+                                </CardDescription>
+                            }
+                            <Link href={`/${tweet.User.username}/status/${tweet.id}`} className="absolute w-full h-full" />
                             <div className="flex">
                                 <CardHeader className="p-4">
                                     <ProfileCard className="z-40" avatar={tweet.User.image as string} trigger="avatar" name={tweet.User.name as string} username={tweet.User.username as string} />
@@ -130,7 +140,7 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                                             </Card>
                                         }
                                     </CardContent>
-                                    <CardFooter className="px-4 pb-4 flex justify-between gap-4">
+                                    <CardFooter className="px-4 pb-4 flex justify-between gap-4 z-40">
                                         <div className="flex gap-4">
                                             <ReplyButton
                                                 tweetId={tweet.id}
@@ -177,7 +187,7 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                                 <Separator /> :
                                 ""
                             }
-                        </Link>
+                        </div>
                     ))}
                 </Card >
             }

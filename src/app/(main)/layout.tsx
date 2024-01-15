@@ -8,12 +8,16 @@ export default function MainLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className="container flex gap-4 p-4 mx-auto">
-            <MainSidebar />
-            <div className="w-1/2">
+        <div className="container relative flex gap-4 p-4 mx-auto">
+            <div className="w-1/4 relative">
+                <MainSidebar />
+            </div>
+            <div className="w-2/4">
                 {children}
             </div>
-            <MainAside />
+            <div className="w-1/4 relative">
+                <MainAside />
+            </div>
         </div>
     )
 }

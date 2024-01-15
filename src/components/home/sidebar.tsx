@@ -15,7 +15,7 @@ export default function MainSidebar() {
     const { data: session } = useSession()
     const router = usePathname()
     return <>
-        <div className="flex flex-col flex-grow gap-6">
+        <div className="flex flex-col gap-6 sticky top-4 left-0">
             <Card>
                 <CardHeader className="p-4">
                     <Link href="/home" className={buttonVariants({ variant: 'default', class: 'justify-start w-fit !text-lg font-semibold' })}>socal-media</Link>

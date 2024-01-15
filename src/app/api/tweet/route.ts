@@ -4,6 +4,7 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export type tweetsType = {
+    Reposting?:boolean;
     id: string;
     userId: string;
     text: string;

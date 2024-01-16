@@ -56,7 +56,7 @@ const TweetCard: FC<TweetCardProps> = () => {
                         placeholder="What is happening?!"
                         value={text}
                         onChange={(e: FormEvent<HTMLTextAreaElement>) => setText(e.currentTarget.value)}
-                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex min-h-[80px] w-full rounded-none bg-transparent border-x-0 border-t-0 border-b-1 px-0 py-0 text-lg focus:border-b-primary border-b-accent focus:outline-none focus:ring-0 ring-offset-background placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
                         rows={3}
                         maxRows={8} />
                 </CardContent>

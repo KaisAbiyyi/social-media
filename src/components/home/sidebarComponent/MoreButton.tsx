@@ -12,7 +12,7 @@ interface Props { }
 const MoreButton: FC = () => {
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", size: "lg", class: "justify-start w-fit gap-4" })}>
+            <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", size: "lg", class: "!justify-start !rounded-none py-6 gap-4" })}>
                 <MoreHorizontal />
                 <span className="text-lg font-semibold">More</span>
             </DropdownMenuTrigger>

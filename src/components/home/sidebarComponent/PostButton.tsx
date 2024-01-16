@@ -6,7 +6,7 @@ import TweetCard from "../main/TweetCard";
 const PostButton: FC = () => {
     return (
         <Dialog>
-            <DialogTrigger className={buttonVariants({ variant: 'default' })}>
+            <DialogTrigger className={buttonVariants({ variant: 'default', className: "!rounded-t-none" })}>
                 Post
             </DialogTrigger>
             <DialogContent className="p-0 pt-12 bg-secondary">

@@ -22,7 +22,7 @@ type ProfileCardProps = {
 const ProfileCard: FC<ProfileCardProps> = ({ trigger, name, username, avatar, className }) => {
     return (<>
         <HoverCard>
-            <HoverCardTrigger asChild>
+            <HoverCardTrigger asChild className="z-10">
                 {(
                     () => {
                         if (trigger === "name") {
@@ -50,7 +50,7 @@ const ProfileCard: FC<ProfileCardProps> = ({ trigger, name, username, avatar, cl
                     })()
                 }
             </HoverCardTrigger>
-            <HoverCardContent className="flex flex-col gap-4 cursor-default">
+            <HoverCardContent className="flex flex-col gap-4 cursor-default !z-[99]">
                 <div className="flex justify-between">
                     <CardHeader className="p-0">
                         <Avatar>

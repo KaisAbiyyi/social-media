@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export type tweetsType = {
-    Reposting?:boolean;
+    Reposting?: boolean;
     id: string;
     userId: string;
     text: string;
@@ -24,6 +24,7 @@ export type tweetsType = {
         email: string;
     },
     quote?: {
+        id: string;
         text: string;
         createdAt: Date;
         updatedAt: Date;
@@ -93,6 +94,7 @@ export async function GET(req: NextRequest) {
                 email: item.User.email as string
             },
             quote: item.quote ? {
+                id: item.quote.id as string,
                 text: item.quote?.text as string,
                 createdAt: item.quote?.createdAt as Date,
                 updatedAt: item.quote?.updatedAt as Date,

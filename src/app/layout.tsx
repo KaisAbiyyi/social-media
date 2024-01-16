@@ -24,8 +24,12 @@ export default function RootLayout({
         <TanstackQueryProvider>
           <NextAuthProviders>
             <ThemeProvider
+              themes={[
+                "lightRed", "lightViolet", "lightOrange", "lightBlue", "lightGreen", "lightYellow",
+                "darkRed", "darkViolet", "darkOrange", "darkBlue", "darkGreen", "darkYellow"
+              ]}
               attribute='class'
-              defaultTheme='light'
+              defaultTheme='lightRed'
               enableSystem={false}
               storageKey='social-media-theme'
             >

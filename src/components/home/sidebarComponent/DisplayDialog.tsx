@@ -8,7 +8,8 @@ import { useTheme } from 'next-themes'
 import React from 'react'
 
 const DisplayDialog = () => {
-    const { setTheme, theme } = useTheme()
+    const { setTheme, theme, themes } = useTheme()
+
     return (
         <Dialog>
             <DialogTrigger className={buttonVariants({ variant: "ghost", className: "!rounded-none gap-2 !justify-start w-full" })}>
@@ -23,23 +24,70 @@ const DisplayDialog = () => {
                     </DialogDescription>
                 </DialogHeader>
                 <DialogHeader className="gap-4">
-                    <DialogHeader>
-                        <DialogDescription>Color</DialogDescription>
-                        <Card>
-                            <CardContent className="flex justify-between px-0 py-0 !p-2">
-                                <RadioGroup defaultValue={theme} className='flex flex-row w-full'>
-                                    <div className="flex items-center flex-grow gap-4 p-4">
-                                        <RadioGroupItem value="light" id="option-one" onClick={() => setTheme('light')} />
-                                        <Label htmlFor="option-one">Default</Label>
+                    <RadioGroup defaultValue={theme} className='flex flex-col gap-4 w-full'>
+                        <DialogHeader>
+                            <DialogDescription>Light Mode</DialogDescription>
+                            <Card className='overflow-hidden'>
+                                <CardContent className="flex justify-between flex-wrap px-0 py-0 !p-2 bg-slate-100 text-slate-900">
+                                    <div className="flex items-center flex-grow gap-4 p-4 lightRed">
+                                        <RadioGroupItem value="lightRed" id="option-lightRed" onClick={() => setTheme('lightRed')} />
+                                        <Label htmlFor="option-lightRed">Red</Label>
                                     </div>
                                     <div className="flex items-center flex-grow gap-4 p-4">
-                                        <RadioGroupItem value="dark" id="option-two" onClick={() => setTheme('dark')} />
-                                        <Label htmlFor="option-two">Dark</Label>
+                                        <RadioGroupItem value="lightViolet" id="option-lightViolet" onClick={() => setTheme('lightViolet')} />
+                                        <Label htmlFor="option-lightViolet">Violet</Label>
                                     </div>
-                                </RadioGroup>
-                            </CardContent>
-                        </Card>
-                    </DialogHeader>
+                                    <div className="flex items-center flex-grow gap-4 p-4 lightBlue">
+                                        <RadioGroupItem value="lightBlue" id="option-lightBlue" onClick={() => setTheme('lightBlue')} />
+                                        <Label htmlFor="option-lightBlue">Blue</Label>
+                                    </div>
+                                    <div className="flex items-center flex-grow gap-4 p-4 lightGreen">
+                                        <RadioGroupItem value="lightGreen" id="option-lightGreen" onClick={() => setTheme('lightGreen')} />
+                                        <Label htmlFor="option-lightGreen">Green</Label>
+                                    </div>
+                                    <div className="flex items-center flex-grow gap-4 p-4 lightOrange">
+                                        <RadioGroupItem value="lightOrange" id="option-lightOrange" onClick={() => setTheme('lightOrange')} />
+                                        <Label htmlFor="option-lightOrange">Orange</Label>
+                                    </div>
+                                    <div className="flex items-center flex-grow gap-4 p-4 lightYellow">
+                                        <RadioGroupItem value="lightYellow" id="option-lightYellow" onClick={() => setTheme('lightYellow')} />
+                                        <Label htmlFor="option-lightYellow">Yellow</Label>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </DialogHeader>
+                        <DialogHeader>
+                            <DialogDescription>Dark Mode</DialogDescription>
+                            <Card className='overflow-hidden'>
+                                <CardContent className="flex justify-between px-0 py-0 !p-2 bg-slate-900 text-slate-100">
+                                    <div className="flex items-center flex-grow gap-4 p-4 darkRed">
+                                        <RadioGroupItem value="darkRed" id="option-darkRed" onClick={() => { setTheme('darkRed') }} />
+                                        <Label htmlFor="option-darkRed">Red</Label>
+                                    </div>
+                                    <div className="flex items-center flex-grow gap-4 p-4 darkViolet">
+                                        <RadioGroupItem value="darkViolet" id="option-darkViolet" onClick={() => setTheme('darkViolet')} />
+                                        <Label htmlFor="option-darkViolet">Violet</Label>
+                                    </div>
+                                    <div className="flex items-center flex-grow gap-4 p-4 darkBlue">
+                                        <RadioGroupItem value="darkBlue" id="option-darkBlue" onClick={() => setTheme('darkBlue')} />
+                                        <Label htmlFor="option-darkBlue">Blue</Label>
+                                    </div>
+                                    <div className="flex items-center flex-grow gap-4 p-4 darkGreen">
+                                        <RadioGroupItem value="darkGreen" id="option-darkGreen" onClick={() => setTheme('darkGreen')} />
+                                        <Label htmlFor="option-darkGreen">Green</Label>
+                                    </div>
+                                    <div className="flex items-center flex-grow gap-4 p-4 darkOrange">
+                                        <RadioGroupItem value="darkOrange" id="option-darkOrange" onClick={() => setTheme('darkOrange')} />
+                                        <Label htmlFor="option-darkOrange">Orange</Label>
+                                    </div>
+                                    <div className="flex items-center flex-grow gap-4 p-4 darkYellow">
+                                        <RadioGroupItem value="darkYellow" id="option-darkYellow" onClick={() => setTheme('darkYellow')} />
+                                        <Label htmlFor="option-darkYellow">Yellow</Label>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </DialogHeader>
+                    </RadioGroup>
                 </DialogHeader>
             </DialogContent>
         </Dialog>

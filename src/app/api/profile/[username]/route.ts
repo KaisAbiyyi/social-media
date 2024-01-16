@@ -9,7 +9,7 @@ export type ProfileType = {
     username: string;
     image: string;
     createdAt: Date;
-    Tweet?: tweetsType[] | null
+    Tweet: tweetsType[] | null
 }
 
 

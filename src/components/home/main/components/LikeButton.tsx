@@ -1,3 +1,4 @@
+import { ProfileType } from "@/app/api/profile/[username]/route";
 import { tweetsType } from "@/app/api/tweet/route";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,12 +11,14 @@ type LikeButtonProps = {
     tweetId: string;
     Liked: boolean;
     LikeAmount: number;
+    queryKey: string
 }
 
-const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked }) => {
+const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, queryKey }) => {
     const queryClient = useQueryClient()
     const [liked, setLiked] = useState<boolean>(Liked)
     const [likeAmount, setLikeAmount] = useState<number>(LikeAmount)
+    const [key, setKey] = useState<string>(queryKey)
 
     useEffect(() => {
         setLiked(Liked)
@@ -23,32 +26,64 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked })
     useEffect(() => {
         setLikeAmount(LikeAmount)
     }, [LikeAmount])
+    useEffect(() => {
+        setKey(queryKey)
+    }, [queryKey])
 
     const { mutate: likeHandler, isPending: loadingLike } = useMutation({
         mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => await axios.post(`/api/tweet/like`, { tweetId, userId }),
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
-            await queryClient.cancelQueries({ queryKey: ["getTweets"] })
-
-            const previousTweet = queryClient.getQueryData<tweetsType[]>(["getTweets"])
-            queryClient.setQueryData(["getTweets"], (previousTweet?.map((item) => {
-                if (item.id === tweetId) {
-                    if (item.Liked) {
-                        return ({ ...item, LikeAmount: item.LikeAmount - 1, Liked: false })
+            if (key === "getTweets") {
+                await queryClient.cancelQueries({ queryKey: ["getTweets"] })
+                const previousTweet = queryClient.getQueryData<tweetsType[]>(["getTweets"])
+                queryClient.setQueryData(["getTweets"], (previousTweet?.map((item) => {
+                    console.log(item)
+                    if (item.id === tweetId) {
+                        if (item.Liked) {
+                            return ({ ...item, LikeAmount: item.LikeAmount - 1, Liked: false })
+                        }
+                        return ({ ...item, LikeAmount: item.LikeAmount + 1, Liked: true })
                     }
-                    return ({ ...item, LikeAmount: item.LikeAmount + 1, Liked: true })
-                }
-                else {
-                    return ({ ...item })
-                }
-            })))
+                    else {
+                        return ({ ...item })
+                    }
+                })))
 
-            return { previousTweet }
+                return { previousTweet }
+            } else if (key === 'getProfile') {
+                await queryClient.cancelQueries({ queryKey: ["getProfile"] })
+                const previousProfile = queryClient.getQueryData<ProfileType>(["getProfile"])
+                queryClient.setQueryData(["getProfile"], {
+                    ...previousProfile,
+                    Tweet: previousProfile?.Tweet?.map((item: tweetsType) => {
+                        if (item.id === tweetId) {
+                            if (item.Liked) {
+                                return { ...item, LikeAmount: item.LikeAmount - 1, Liked: false };
+                            }
+                            return { ...item, LikeAmount: item.LikeAmount + 1, Liked: true };
+                        } else {
+                            return { ...item };
+                        }
+                    })
+                })
+
+                return { previousProfile }
+            }
+
         },
         onError: (_, __, context) => {
-            queryClient.setQueryData(["getTweets"], () => context?.previousTweet);
+            if (key === "getTweets") {
+                queryClient.setQueryData(["getTweets"], () => context?.previousTweet);
+            } else {
+                queryClient.setQueryData(["getProfile"], () => context?.previousTweet);
+            }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["getTweets"] })
+            if (key === "getTweets") {
+                queryClient.invalidateQueries({ queryKey: ["getTweets"] })
+            } else {
+                queryClient.invalidateQueries({ queryKey: ["getProfile"] })
+            }
         }
     })
 

@@ -1,4 +1,6 @@
 "use client"
+
+
 import { tweetsType } from "@/app/api/tweet/route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
@@ -17,52 +19,38 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import SpinnerLoader from "@/components/ui/spinner";
-import { ToastAction } from "@/components/ui/toast";
-import { useToast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { MoreHorizontal, RefreshCcw, Trash } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { FC } from "react";
+import Link from "next/link";
+import { FC, useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
 import BookmarkButton from "./components/BookmarkButton";
 import LikeButton from "./components/LikeButton";
 import QuoteButton from "./components/QuoteButton";
 import ReplyButton from "./components/ReplyButton";
 import RepostButton from "./components/RepostButton";
-import Link from "next/link";
 
+type TweetsListType = {
+    data: tweetsType[],
+    queryKey: string;
+}
 
-const TweetsList: FC = () => {
-    const { toast } = useToast()
+const TweetsList: FC<TweetsListType> = ({ data, queryKey }) => {
     const { data: user, status } = useSession()
-    const { data, isPending, isError } = useQuery({
-        queryKey: ["getTweets"],
-        queryFn: async () => {
-            const { data } = await axios.get("/api/tweet");
-            return data.data
-        },
-    })
-    if (isError) {
-        toast({
-            title: "Something went wrong",
-            description: "There was some error when fetching the data",
-            action: <ToastAction altText="Try again">Try again</ToastAction>,
-            variant: "destructive",
-        })
-    }
+    const [tweets, setTweets] = useState<tweetsType[]>(data)
+    const [key, setKey] = useState<string>(queryKey) 
 
-    if (isPending) return (
-        <div className="flex flex-col items-center">
-            <SpinnerLoader />
-        </div>
-    )
+    useEffect(() => {
+        setTweets(data)
+    }, [data])
+    useEffect(()=>{
+        setKey(queryKey)
+    },[queryKey])
 
     return (<>
-        {data.length > 0 &&
+        {tweets.length > 0 &&
             <Card>
-                {data.map((tweet: tweetsType, index: number, array: tweetsType[]) => (
+                {tweets.map((tweet: tweetsType, index: number, array: tweetsType[]) => (
                     <div className="relative" key={tweet.id}>
                         <Link href={`/${tweet.User.username}/status/${tweet.id}`} className="absolute z-0 w-full h-full" />
                         <div className="flex">
@@ -71,9 +59,9 @@ const TweetsList: FC = () => {
                             </CardHeader>
                             <div className="flex flex-col flex-grow">
                                 <CardHeader className="flex flex-row space-y-0 px-4 py-4 !items-center justify-between">
-                                    <div className="flex gap-4 items-center">
-                                        <ProfileCard avatar={tweet.User.image as string} trigger="name" name={tweet.User.name as string} username={tweet.User.username as string} />
-                                        <ProfileCard avatar={tweet.User.image as string} trigger="username" name={tweet.User.name as string} username={tweet.User.username as string} />
+                                    <div className="flex gap-4 items-center z-40">
+                                        <ProfileCard className="z-40" avatar={tweet.User.image as string} trigger="name" name={tweet.User.name as string} username={tweet.User.username as string} />
+                                        <ProfileCard className="z-40" avatar={tweet.User.image as string} trigger="username" name={tweet.User.name as string} username={tweet.User.username as string} />
                                     </div>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", size: "sm" })}><MoreHorizontal /></DropdownMenuTrigger>
@@ -137,6 +125,7 @@ const TweetsList: FC = () => {
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                         <LikeButton
+                                            queryKey={queryKey}
                                             userId={user?.user.id as string}
                                             tweetId={tweet.id}
                                             LikeAmount={tweet.LikeAmount}

@@ -60,6 +60,13 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         }
     })
 
+    if (!getUser) {
+        return NextResponse.json({
+            success: false,
+            message: "User not found"
+        }, { status: 404 })
+    }
+
     const GeneralTweets = getUser?.Tweet.map((tweet) => ({
         id: tweet.id,
         userId: tweet.userId,
@@ -80,6 +87,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
             email: tweet.User.email as string,
         },
         quote: tweet.quote ? {
+            id: tweet.quote.User.id,
             text: tweet.quote?.text,
             createdAt: tweet.quote?.createdAt,
             updatedAt: tweet.quote?.updatedAt,
@@ -115,16 +123,10 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
 
     const Tweet: tweetsType[] = [...GeneralTweets, ...RepostedTweets].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
 
-    if (!getUser) {
-        return NextResponse.json({
-            success: false,
-            message: "User not found"
-        }, { status: 404 })
-    }
 
     const data: ProfileType = {
         name: getUser.name as string,
-        username: getUser.name as string,
+        username: getUser.username as string,
         image: getUser.image as string,
         createdAt: getUser.createdAt as Date,
         Tweet

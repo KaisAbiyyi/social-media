@@ -33,11 +33,10 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, q
     const { mutate: likeHandler, isPending: loadingLike } = useMutation({
         mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => await axios.post(`/api/tweet/like`, { tweetId, userId }),
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
+            await queryClient.cancelQueries({ queryKey: [key] })
+            const previousData = key === "getTweets" ? queryClient.getQueryData<tweetsType[]>([key]) : queryClient.getQueryData<ProfileType>([key])
             if (key === "getTweets") {
-                await queryClient.cancelQueries({ queryKey: ["getTweets"] })
-                const previousTweet = queryClient.getQueryData<tweetsType[]>(["getTweets"])
-                queryClient.setQueryData(["getTweets"], (previousTweet?.map((item) => {
-                    console.log(item)
+                queryClient.setQueryData(["getTweets"], ((previousData as tweetsType[])?.map((item) => {
                     if (item.id === tweetId) {
                         if (item.Liked) {
                             return ({ ...item, LikeAmount: item.LikeAmount - 1, Liked: false })
@@ -49,13 +48,10 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, q
                     }
                 })))
 
-                return { previousTweet }
             } else if (key === 'getProfile') {
-                await queryClient.cancelQueries({ queryKey: ["getProfile"] })
-                const previousProfile = queryClient.getQueryData<ProfileType>(["getProfile"])
                 queryClient.setQueryData(["getProfile"], {
-                    ...previousProfile,
-                    Tweet: previousProfile?.Tweet?.map((item: tweetsType) => {
+                    ...previousData,
+                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
                         if (item.id === tweetId) {
                             if (item.Liked) {
                                 return { ...item, LikeAmount: item.LikeAmount - 1, Liked: false };
@@ -65,25 +61,16 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, q
                             return { ...item };
                         }
                     })
-                })
-
-                return { previousProfile }
+                } as ProfileType)
             }
+            return { previousData }
 
         },
         onError: (_, __, context) => {
-            if (key === "getTweets") {
-                queryClient.setQueryData(["getTweets"], () => context?.previousTweet);
-            } else {
-                queryClient.setQueryData(["getProfile"], () => context?.previousTweet);
-            }
+            queryClient.setQueryData([key], () => context?.previousData);
         },
         onSettled: () => {
-            if (key === "getTweets") {
-                queryClient.invalidateQueries({ queryKey: ["getTweets"] })
-            } else {
-                queryClient.invalidateQueries({ queryKey: ["getProfile"] })
-            }
+            queryClient.invalidateQueries({ queryKey: [key] })
         }
     })
 

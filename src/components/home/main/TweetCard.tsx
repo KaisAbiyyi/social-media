@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { FC, FormEvent, useState } from "react";
 import ReactTextareaAutosize from "react-textarea-autosize";
 
@@ -46,7 +47,8 @@ const TweetCard: FC<TweetCardProps> = () => {
         <Card>
             <div className="flex">
                 <CardHeader className="p-4">
-                    <Avatar>
+                    <Avatar className="relative">
+                        <Link href={`/${data?.user.username}`} className="w-full h-full absolute" />
                         <AvatarImage src={data?.user.image ?? ''} />
                         <AvatarFallback>{data?.user.name?.at(0)?.toUpperCase()}</AvatarFallback>
                     </Avatar>

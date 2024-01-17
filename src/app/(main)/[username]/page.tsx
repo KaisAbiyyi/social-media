@@ -11,6 +11,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 import { FC } from "react";
 
 interface ProfilePageProps {
@@ -21,6 +22,7 @@ interface ProfilePageProps {
 
 const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
     const { toast } = useToast()
+    const { data: User, status } = useSession()
     const { data: ProfileData, isPending: ProfileLoading, isError } = useQuery({
         queryKey: ["getProfile"],
         queryFn: async () => {
@@ -80,7 +82,10 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                             </div>
                         </CardContent>
                         <CardFooter className="p-4">
-                            <Button type="button">Following</Button>
+                            {User?.user.username === ProfileData?.username ?
+                                <Button variant="outline" type="button">Edit Profile</Button> :
+                                <Button type="button">Following</Button>
+                            }
                         </CardFooter>
                     </Card>
                     <TweetsList data={ProfileData?.Tweet as tweetsType[]} queryKey="getProfile" />

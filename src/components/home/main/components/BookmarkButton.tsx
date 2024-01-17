@@ -1,20 +1,26 @@
+import { ProfileType } from "@/app/api/profile/[username]/route";
 import { tweetsType } from "@/app/api/tweet/route";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { Bookmark, Heart } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 
 type BookmarkButtonProps = {
     userId: string;
     tweetId: string;
     Bookmarked: boolean;
+    queryKey: string;
 }
 
-const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked }) => {
+const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, queryKey }) => {
     const queryClient = useQueryClient()
     const [bookmarked, setBookmarked] = useState<boolean>(Bookmarked)
+    const [key, setKey] = useState<string>(queryKey)
 
+    useEffect(() => {
+        setKey(queryKey)
+    }, [queryKey])
     useEffect(() => {
         setBookmarked(Bookmarked)
     }, [Bookmarked])
@@ -22,28 +28,44 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked }
     const { mutate: bookmarkHandler, isPending: loadingBookmark } = useMutation({
         mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => await axios.post(`/api/tweet/bookmark`, { tweetId, userId }),
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
-            await queryClient.cancelQueries({ queryKey: ["getTweets"] })
+            await queryClient.cancelQueries({ queryKey: [queryKey] })
 
-            const previousTweet = queryClient.getQueryData<tweetsType[]>(["getTweets"])
-            queryClient.setQueryData(["getTweets"], (previousTweet?.map((item) => {
-                if (item.id === tweetId) {
-                    if (item.Bookmarked) {
-                        return ({ ...item, Bookmarked: false })
+            const previousTweet = key === "getTweets" ? queryClient.getQueryData<tweetsType[]>([key]) : queryClient.getQueryData<ProfileType>([key])
+            if (key === "getTweets") {
+                queryClient.setQueryData([key], ((previousTweet as tweetsType[]).map((item: tweetsType) => {
+                    if (item.id === tweetId) {
+                        if (item.Bookmarked) {
+                            return ({ ...item, Bookmarked: false })
+                        }
+                        return ({ ...item, Bookmarked: true })
                     }
-                    return ({ ...item, Bookmarked: true })
-                }
-                else {
-                    return ({ ...item })
-                }
-            })))
+                    else {
+                        return ({ ...item })
+                    }
+                })))
+            } else {
+                queryClient.setQueryData([key], {
+                    ...previousTweet,
+                    Tweet: (previousTweet as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                        if (item.id === tweetId) {
+                            if (item.Bookmarked) {
+                                return { ...item, Bookmarked: false };
+                            }
+                            return { ...item, Bookmarked: true };
+                        } else {
+                            return { ...item };
+                        }
+                    })
+                } as ProfileType)
+            }
 
             return { previousTweet }
         },
         onError: (_, __, context) => {
-            queryClient.setQueryData(["getTweets"], () => context?.previousTweet);
+            queryClient.setQueryData([key], () => context?.previousTweet);
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["getTweets"] })
+            queryClient.invalidateQueries({ queryKey: [key] })
         }
     })
 

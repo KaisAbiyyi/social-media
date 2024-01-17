@@ -135,6 +135,7 @@ const TweetsList: FC<TweetsListType> = ({ data, queryKey }) => {
                                             />
                                         </div>
                                         <BookmarkButton
+                                            queryKey={queryKey}
                                             userId={user?.user.id as string}
                                             tweetId={tweet.id}
                                             Bookmarked={tweet.Bookmarked} />

@@ -1,23 +1,22 @@
 "use client"
 
+import TweetsList from "@/components/home/main/TweetsList";
+import TweetsListSkeleton from "@/components/home/main/components/TweetsListSkeleton";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSession } from "next-auth/react";
-import { FC } from "react";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useToast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
-import TweetsList from "@/components/home/main/TweetsList";
+import { MoreHorizontal } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { FC } from "react";
 
 
 interface BookmarksPageProps {
@@ -66,7 +65,7 @@ const BookmarksPage: FC<BookmarksPageProps> = () => {
                 </CardFooter>
             </Card>
             {BookmarksPending ?
-                "loading..." :
+                <TweetsListSkeleton /> :
                 <TweetsList data={BookmarksData} queryKey="getBookmarks" />
             }
         </div>

@@ -55,9 +55,6 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
 
     const { mutate: submitReply, isPending: replyPending } = useMutation({
         mutationFn: async ({ tweetId, userId, text }: ReplyTweetType) => await axios.post("/api/tweet/reply", { userId, tweetId, text }),
-        onSuccess: (data) => {
-            setText("")
-        },
         onMutate: async ({ tweetId }: { tweetId: string }) => {
             await queryClient.cancelQueries({ queryKey: [key] })
             const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
@@ -90,6 +87,7 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
         },
         onSettled: () => {
             setOpen(false)
+            setText("")
             queryClient.invalidateQueries({ queryKey: [key] })
         }
     })

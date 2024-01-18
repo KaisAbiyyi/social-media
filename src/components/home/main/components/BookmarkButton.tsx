@@ -44,6 +44,8 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
                         }
                     })
                 } as ProfileType)
+            } else if (key === 'getBookmarks') {
+                queryClient.setQueryData([key], (previousData as tweetsType[])?.filter((item: tweetsType) => item.id !== tweetId))
             } else {
                 queryClient.setQueryData([key], ((previousData as tweetsType[]).map((item: tweetsType) => {
                     if (item.id === tweetId) {

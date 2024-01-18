@@ -42,7 +42,7 @@ type Tweet = Prisma.TweetGetPayload<{
         Like: true,
         Bookmark: true,
         Repost: true,
-        Reply: true,
+        replies: true,
         quote: {
             include: {
                 User: true
@@ -61,12 +61,15 @@ export async function GET(req: NextRequest) {
             Like: true,
             Bookmark: true,
             Repost: true,
-            Reply: true,
+            replies: true,
             quote: {
                 include: {
                     User: true
                 }
             }
+        },
+        where: {
+            repliedId: null,
         },
         orderBy: {
             createdAt: "desc"
@@ -85,7 +88,7 @@ export async function GET(req: NextRequest) {
             Bookmarked: !!(item.Bookmark.find((item: Bookmark) => item.userId === session?.id)),
             RepostAmount: item.Repost.length,
             Reposted: !!(item.Repost.find((item: Repost) => item.userId === session?.id)),
-            ReplyAmount: item.Reply.length,
+            ReplyAmount: item.replies.length,
             User: {
                 id: item.User.id,
                 image: item.User.image as string,

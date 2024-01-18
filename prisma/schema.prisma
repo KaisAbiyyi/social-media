@@ -35,7 +35,6 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
 }
 
 model User {
@@ -52,7 +51,6 @@ model User {
   Tweet         Tweet[]
   Like          Like[]
   Bookmark      Bookmark[]
-  Reply         Reply[]
   Repost        Repost[]
   followers     Follows[]  @relation("following")
   following     Follows[]  @relation("follower")
@@ -87,21 +85,26 @@ model Tweet {
   updatedAt DateTime   @updatedAt
   Like      Like[]
   Bookmark  Bookmark[]
-  Reply     Reply[]
   Repost    Repost[]
-  quotedId  String?    @map("tweetId")
-  quote     Tweet?     @relation("QuotedTweet", fields: [quotedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  quotes    Tweet[]    @relation("QuotedTweet")
+
+  repliedId String?
+  reply     Tweet?  @relation("RepliedTweet", fields: [repliedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Tweet[] @relation("RepliedTweet")
+
+  quotedId String?
+  quote    Tweet?  @relation("QuotedTweet", fields: [quotedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quotes   Tweet[] @relation("QuotedTweet")
 
   @@index([quotedId])
+  @@index([repliedId])
   @@index([userId])
 }
 
 model Like {
   id        String   @id @default(uuid())
-  User      User     @relation(fields: [userId], references: [id])
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
-  Tweet     Tweet    @relation(fields: [tweetId], references: [id])
+  Tweet     Tweet    @relation(fields: [tweetId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   tweetId   String
   createdAt DateTime @default(now())
 
@@ -111,9 +114,9 @@ model Like {
 
 model Bookmark {
   id        String   @id @default(uuid())
-  User      User     @relation(fields: [userId], references: [id])
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
-  Tweet     Tweet    @relation(fields: [tweetId], references: [id])
+  Tweet     Tweet    @relation(fields: [tweetId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   tweetId   String
   createdAt DateTime @default(now())
 
@@ -123,28 +126,12 @@ model Bookmark {
 
 model Repost {
   id        String   @id @default(uuid())
-  User      User     @relation(fields: [userId], references: [id])
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
-  Tweet     Tweet    @relation(fields: [tweetId], references: [id])
+  Tweet     Tweet    @relation(fields: [tweetId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   tweetId   String
   createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([tweetId])
-}
-
-model Reply {
-  id        String  @id @default(uuid())
-  text      String  @db.Text
-  User      User    @relation(fields: [userId], references: [id])
-  userId    String
-  Tweet     Tweet?  @relation(fields: [tweetId], references: [id])
-  tweetId   String?
-  repliedId String? @map("replyId")
-  replied   Reply?  @relation("RepliedReply", fields: [repliedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  replies   Reply[] @relation("RepliedReply")
-
-  @@index([userId])
-  @@index([tweetId])
-  @@index([repliedId])
 }

@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { text, userId, tweetId, repliedId } = body
+        const { text, userId, tweetId } = body
         const requiredFields = ["text", "userId"];
         const errResponse = requiredFields
             .filter(field => !body[field])
@@ -14,59 +14,32 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, message: errResponse }, { status: 403 });
         }
 
-        if (repliedId) {
-            const reply = await prisma.reply.findFirst({
-                where: {
-                    id: repliedId
-                }
-            })
-
-            if (!reply) {
-                return NextResponse.json({
-                    success: false,
-                    message: "Invalid Reply ID"
-                }, { status: 404 })
+        const reply = await prisma.tweet.findFirst({
+            where: {
+                id: tweetId
             }
+        })
 
-            const data = await prisma.reply.create({
-                data: {
-                    text,
-                    userId,
-                    repliedId
-                }
-            })
-
+        if (!reply) {
             return NextResponse.json({
-                success: true,
-                message: "Reply created",
-                data
-            }, { status: 201 })
-        } else {
-            const tweet = await prisma.tweet.findFirst({
-                where: {
-                    id: tweetId
-                }
-            })
-            if (!tweet) {
-                return NextResponse.json({
-                    success: false,
-                    message: "Invalid Tweet ID"
-                }, { status: 404 })
-            }
-            const data = await prisma.reply.create({
-                data: {
-                    text,
-                    userId,
-                    tweetId
-                }
-            })
-
-            return NextResponse.json({
-                success: true,
-                message: "Reply created",
-                data
-            }, { status: 201 })
+                success: false,
+                message: "Invalid Tweet ID"
+            }, { status: 404 })
         }
+
+        const data = await prisma.tweet.create({
+            data: {
+                text,
+                userId,
+                repliedId: tweetId
+            }
+        })
+
+        return NextResponse.json({
+            success: true,
+            message: "Reply created",
+            data
+        }, { status: 201 })
     } catch (error) {
         return NextResponse.json({
             success: false,

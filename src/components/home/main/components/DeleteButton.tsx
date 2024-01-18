@@ -44,7 +44,7 @@ const DeleteButton: FC<DeleteButtonProps> = ({ id, queryKey }) => {
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: [key] })
         },
-        onError: (error) => {
+        onError: (error, _, context) => {
             queryClient.setQueryData([key], () => context?.previousData);
             toast({
                 title: "Something went wrong",

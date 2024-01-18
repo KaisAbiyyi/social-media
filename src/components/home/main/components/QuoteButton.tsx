@@ -1,17 +1,16 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import ReactTextareaAutosize from "react-textarea-autosize";
+import SpinnerLoader from "@/components/ui/spinner";
+import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from "@radix-ui/react-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { PencilLine } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { FC, FormEvent, useState } from "react";
-import { Button } from "@/components/ui/button";
-import SpinnerLoader from "@/components/ui/spinner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/components/ui/use-toast";
-import axios from "axios";
-import { ToastAction } from "@radix-ui/react-toast";
-import ProfileCard from "../ProfileCard";
+import { FC, FormEvent, useEffect, useState } from "react";
+import ReactTextareaAutosize from "react-textarea-autosize";
 
 interface QuoteButtonProps {
     userTweetId: string;
@@ -20,6 +19,7 @@ interface QuoteButtonProps {
     userName: string;
     userImage: string;
     userText: string;
+    queryKey: string;
 }
 
 type TweetType = {
@@ -29,17 +29,24 @@ type TweetType = {
     tweetId?: string;
 }
 
-const QuoteButton: FC<QuoteButtonProps> = ({ userTweetId, tweetId, userImage, userName, userUsername, userText }) => {
+
+const QuoteButton: FC<QuoteButtonProps> = ({ userTweetId, tweetId, userImage, userName, userUsername, userText, queryKey }) => {
     const [text, setText] = useState<string>("")
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
+    const [key, setKey] = useState<string>(queryKey)
     const queryClient = useQueryClient()
     const { data, status } = useSession()
     const { toast } = useToast()
+
+    useEffect(() => {
+        setKey(queryKey)
+    }, [queryKey])
+
     const { mutate: QuoteTweet, isPending } = useMutation({
         mutationFn: async ({ text, userId, userTweetId, tweetId }: TweetType) => await axios.post("/api/tweet", { text, userId, userTweetId, tweetId }),
-        onSuccess: (data) => {
+        onSettled: (data) => {
             setText("")
-            queryClient.invalidateQueries({ queryKey: ['getTweets'] })
+            queryClient.invalidateQueries({ queryKey: [key] })
             setDialogOpen(false)
         },
         onError: (err: any) => {

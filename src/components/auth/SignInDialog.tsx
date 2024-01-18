@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "../ui/use-toast";
 import { ToastAction } from "../ui/toast";
 import { Card, CardContent, CardHeader } from "../ui/card";
+import SpinnerLoader from "../ui/spinner";
 
 const formSchema = z.object({
     email: z.string().min(1, {
@@ -27,6 +28,7 @@ const formSchema = z.object({
 const SignInDialog: FC = () => {
     const router = useRouter()
     const [open, setOpen] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -53,17 +55,22 @@ const SignInDialog: FC = () => {
                             <Separator />
                             <Form {...form}>
                                 <form onSubmit={form.handleSubmit(async (values: z.infer<typeof formSchema>) => {
-                                    const login = await signIn("credentials", { email: values.email, password: values.password, redirect: false })
-                                    if (login?.ok) {
-                                        router.push('/home')
-                                    } else {
+                                    try {
+                                        setIsLoading(true)
+                                        const login = await signIn("credentials", { email: values.email, password: values.password, redirect: false })
+                                        if (login?.ok) {
+                                            router.push('/home')
+                                        }
+                                    } catch (error) {
+                                        console.log(error)
                                         toast({
                                             title: "Something went wrong",
                                             description: "Email or password incorrect",
                                             action: <ToastAction altText="Try again">Try again</ToastAction>,
                                             variant: "destructive",
                                         })
-
+                                    } finally {
+                                        setIsLoading(false)
                                     }
                                 })} className="space-y-8">
                                     <FormField
@@ -92,7 +99,7 @@ const SignInDialog: FC = () => {
                                             </FormItem>
                                         )}
                                     />
-                                    <Button type="submit" className="w-full" >Sign in with credentials</Button>
+                                    <Button type="submit" className="w-full flex gap-2" disabled={isLoading}>Sign in with credentials {isLoading ? <SpinnerLoader /> : ""}</Button>
                                 </form>
                             </Form>
                         </div>

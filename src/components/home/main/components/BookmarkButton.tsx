@@ -29,24 +29,11 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
         mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => await axios.post(`/api/tweet/bookmark`, { tweetId, userId }),
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
             await queryClient.cancelQueries({ queryKey: [queryKey] })
-
-            const previousTweet = key === "getTweets" ? queryClient.getQueryData<tweetsType[]>([key]) : queryClient.getQueryData<ProfileType>([key])
-            if (key === "getTweets") {
-                queryClient.setQueryData([key], ((previousTweet as tweetsType[]).map((item: tweetsType) => {
-                    if (item.id === tweetId) {
-                        if (item.Bookmarked) {
-                            return ({ ...item, Bookmarked: false })
-                        }
-                        return ({ ...item, Bookmarked: true })
-                    }
-                    else {
-                        return ({ ...item })
-                    }
-                })))
-            } else {
+            const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
+            if (key === "getProfile") {
                 queryClient.setQueryData([key], {
-                    ...previousTweet,
-                    Tweet: (previousTweet as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                    ...previousData,
+                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
                         if (item.id === tweetId) {
                             if (item.Bookmarked) {
                                 return { ...item, Bookmarked: false };
@@ -57,12 +44,24 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
                         }
                     })
                 } as ProfileType)
+            } else {
+                queryClient.setQueryData([key], ((previousData as tweetsType[]).map((item: tweetsType) => {
+                    if (item.id === tweetId) {
+                        if (item.Bookmarked) {
+                            return ({ ...item, Bookmarked: false })
+                        }
+                        return ({ ...item, Bookmarked: true })
+                    }
+                    else {
+                        return ({ ...item })
+                    }
+                })))
             }
 
-            return { previousTweet }
+            return { previousData }
         },
         onError: (_, __, context) => {
-            queryClient.setQueryData([key], () => context?.previousTweet);
+            queryClient.setQueryData([key], () => context?.previousData);
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: [key] })

@@ -19,6 +19,7 @@ import SpinnerLoader from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { tweetsType } from "@/app/api/tweet/route";
+import { ProfileType } from "@/app/api/profile/[username]/route";
 
 interface ReplyButtonProps {
     tweetId: string;
@@ -27,6 +28,7 @@ interface ReplyButtonProps {
     tweetUserName: string;
     tweetUserUsername: string;
     tweetReplyAmount: number;
+    queryKey: string
 }
 
 interface ReplyTweetType {
@@ -35,47 +37,60 @@ interface ReplyTweetType {
     userId: string
 }
 
-const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage, tweetUserName, tweetUserUsername, tweetReplyAmount }) => {
+const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage, tweetUserName, tweetUserUsername, tweetReplyAmount, queryKey }) => {
     const { data, status } = useSession()
     const [text, setText] = useState<string>("")
     const [open, setOpen] = useState<boolean>(false)
     const [replyAmount, setReplyAmount] = useState<number>(tweetReplyAmount)
+    const [key, setKey] = useState<string>(queryKey)
     const { toast } = useToast()
     const queryClient = useQueryClient()
 
     useEffect(() => {
         setReplyAmount(tweetReplyAmount)
     }, [tweetReplyAmount])
+    useEffect(() => {
+        setKey(queryKey)
+    }, [queryKey])
 
     const { mutate: submitReply, isPending: replyPending } = useMutation({
         mutationFn: async ({ tweetId, userId, text }: ReplyTweetType) => await axios.post("/api/tweet/reply", { userId, tweetId, text }),
         onSuccess: (data) => {
             setText("")
         },
-        onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
-            await queryClient.cancelQueries({ queryKey: ["getTweets"] })
-
-            const previousTweet = queryClient.getQueryData<tweetsType[]>(["getTweets"])
-            queryClient.setQueryData(["getTweets"], (previousTweet?.map((item) => {
-                if (item.id === tweetId) {
-                    if (item.ReplyAmount) {
-                        return ({ ...item, ReplyAmount: item.ReplyAmount - 1 })
+        onMutate: async ({ tweetId }: { tweetId: string }) => {
+            await queryClient.cancelQueries({ queryKey: [key] })
+            const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
+            if (key === "getProfile") {
+                queryClient.setQueryData(["getProfile"], {
+                    ...previousData,
+                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                        if (item.id === tweetId) {
+                            return { ...item, ReplyAmount: item.ReplyAmount + 1 };
+                        } else {
+                            return { ...item };
+                        }
+                    })
+                } as ProfileType)
+            } else {
+                queryClient.setQueryData([key], ((previousData as tweetsType[])?.map((item) => {
+                    if (item.id === tweetId) {
+                        return ({ ...item, ReplyAmount: item.ReplyAmount + 1 })
                     }
-                    return ({ ...item, ReplyAmount: item.ReplyAmount + 1 })
-                }
-                else {
-                    return ({ ...item })
-                }
-            })))
+                    else {
+                        return ({ ...item })
+                    }
+                })))
+            }
 
-            return { previousTweet }
+            return { previousData }
         },
         onError: (_, __, context) => {
-            queryClient.setQueryData(["getTweets"], () => context?.previousTweet);
+            queryClient.setQueryData([key], () => context?.previousData);
         },
         onSettled: () => {
             setOpen(false)
-            queryClient.invalidateQueries({ queryKey: ['getTweets'] })
+            queryClient.invalidateQueries({ queryKey: [key] })
         }
     })
 

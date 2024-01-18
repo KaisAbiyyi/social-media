@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db";
-import { Bookmark, Like, Repost, Tweet } from "@prisma/client";
+import { Bookmark, Like, Repost } from "@prisma/client";
+import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 import { tweetsType } from "../../tweet/route";
-import { getToken } from "next-auth/jwt";
 
 export type ProfileType = {
     name: string;
@@ -121,7 +121,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         },
     })) ?? []
 
-    const Tweet: tweetsType[] = [...GeneralTweets, ...RepostedTweets].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+    const Tweet: tweetsType[] = [...GeneralTweets, ...RepostedTweets].sort((a, b) => (new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()))
 
 
     const data: ProfileType = {

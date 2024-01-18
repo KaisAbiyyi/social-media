@@ -5,11 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export type tweetsType = {
     Reposting?: boolean;
-    id: string;
+    id?: string;
     userId: string;
     text: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
     LikeAmount: number;
     Liked: boolean;
     Bookmarked: boolean;

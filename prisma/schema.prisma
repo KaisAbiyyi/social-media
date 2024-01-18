@@ -6,9 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model Account {
@@ -24,8 +24,7 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -36,10 +35,11 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
 }
 
 model User {
-  id            String     @id @default(uuid())
+  id            String     @id @default(cuid())
   name          String?
   username      String?    @unique
   password      String?
@@ -66,6 +66,8 @@ model Follows {
   followingId String
 
   @@unique([followingId, followerId])
+  @@index([followerId])
+  @@index([followingId])
 }
 
 model VerificationToken {
@@ -79,7 +81,7 @@ model VerificationToken {
 model Tweet {
   id        String     @id @default(uuid())
   text      String     @db.Text
-  User      User       @relation(fields: [userId], references: [id])
+  User      User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -88,8 +90,11 @@ model Tweet {
   Reply     Reply[]
   Repost    Repost[]
   quotedId  String?    @map("tweetId")
-  quote     Tweet?     @relation("QuotedTweet", fields: [quotedId], references: [id])
+  quote     Tweet?     @relation("QuotedTweet", fields: [quotedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   quotes    Tweet[]    @relation("QuotedTweet")
+
+  @@index([quotedId])
+  @@index([userId])
 }
 
 model Like {
@@ -99,6 +104,9 @@ model Like {
   Tweet     Tweet    @relation(fields: [tweetId], references: [id])
   tweetId   String
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([tweetId])
 }
 
 model Bookmark {
@@ -108,6 +116,9 @@ model Bookmark {
   Tweet     Tweet    @relation(fields: [tweetId], references: [id])
   tweetId   String
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([tweetId])
 }
 
 model Repost {
@@ -117,6 +128,9 @@ model Repost {
   Tweet     Tweet    @relation(fields: [tweetId], references: [id])
   tweetId   String
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([tweetId])
 }
 
 model Reply {
@@ -127,6 +141,10 @@ model Reply {
   Tweet     Tweet?  @relation(fields: [tweetId], references: [id])
   tweetId   String?
   repliedId String? @map("replyId")
-  replied   Reply?  @relation("RepliedReply", fields: [repliedId], references: [id])
+  replied   Reply?  @relation("RepliedReply", fields: [repliedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   replies   Reply[] @relation("RepliedReply")
+
+  @@index([userId])
+  @@index([tweetId])
+  @@index([repliedId])
 }

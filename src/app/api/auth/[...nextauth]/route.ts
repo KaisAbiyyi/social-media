@@ -1,13 +1,11 @@
+import { prisma } from '@/lib/db'
+import { PrismaAdapter } from '@auth/prisma-adapter'
 import { compareSync } from 'bcrypt'
+import { nanoid } from 'nanoid'
 import NextAuth, { type NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { PrismaClient, User } from '@prisma/client'
-import { generateRandomNumberString } from '@/lib/utils'
-const prisma = new PrismaClient()
-const randomNumber = generateRandomNumberString(4)
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -50,7 +48,8 @@ export const authOptions: NextAuthOptions = {
                     id: user.id,
                     email: user.email,
                     name: user.name,
-                    username: user.username
+                    username: user.username,
+                    image: user.image
                 }
             }
         }),
@@ -59,52 +58,51 @@ export const authOptions: NextAuthOptions = {
             clientSecret: process.env.GITHUB_SECRET ?? "",
         }),
         GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? ""
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!
         })
     ],
-    events: {
-        signIn: async ({ user, isNewUser }) => {
-            const findUser = await prisma.user.findFirst({
+    callbacks: {
+        async session({ token, session }) {
+            if (token) {
+                session.user.id = token.id as string
+                session.user.name = token.name as string
+                session.user.email = token.email as string
+                session.user.image = token.image as string
+                session.user.username = token.username as string
+            }
+            return session
+        },
+        async jwt({ token, user }) {
+            const dbUser = await prisma.user.findFirst({
                 where: {
-                    email: user.email as string
-                },
+                    email: token.email
+                }
             })
 
-            if (findUser?.username === null || findUser?.username === "" || findUser?.username === undefined) {
+            if (!dbUser) {
+                token.id = user!.id
+                return token
+            }
+            if (!dbUser.username) {
                 await prisma.user.update({
                     where: {
-                        email: findUser?.email as string,
+                        id: dbUser.id
                     },
                     data: {
-                        username: user.name?.toLowerCase().replaceAll(" ", "") + randomNumber
+                        username: nanoid(10)
                     }
                 })
             }
-        }
-    },
-    callbacks: {
-        session: ({ session, token }) => {
+
             return {
-                ...session,
-                user: {
-                    ...session.user,
-                    id: token.id,
-                    username: token.username ?? token.name?.toLowerCase().replaceAll(' ', '') + randomNumber
-                }
+                id: dbUser.id,
+                name: dbUser.name,
+                email: dbUser.email,
+                image: dbUser.image,
+                username: dbUser.username,
             }
         },
-        jwt: ({ token, user }) => {
-            if (user) {
-                const u = user as unknown as User
-                return {
-                    ...token,
-                    id: u.id,
-                    username: u.username ?? u.name?.toLowerCase().replaceAll(' ', '') + randomNumber
-                }
-            }
-            return token
-        }
     },
     pages: {
         signIn: '/'
@@ -114,3 +112,4 @@ export const authOptions: NextAuthOptions = {
 const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }
+

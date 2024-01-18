@@ -1,5 +1,6 @@
 "use client"
 
+import { tweetsType } from "@/app/api/tweet/route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -25,15 +26,40 @@ type TweetType = {
 const TweetCard: FC<TweetCardProps> = () => {
     const [text, setText] = useState<string>("")
     const queryClient = useQueryClient()
-    const { data, status } = useSession()
+    const { data: User, status } = useSession()
     const { toast } = useToast()
     const { mutate: CreateNewPost, isPending } = useMutation({
         mutationFn: async ({ text, userId }: TweetType) => await axios.post("/api/tweet", { text, userId }),
-        onSuccess: (data) => {
+        onMutate: async (data) => {
+            await queryClient.cancelQueries({ queryKey: ["getTweets"] })
+            const previousData = queryClient.getQueryData<tweetsType[]>(["getTweets"])
+            const optimisTicData: tweetsType = {
+                text: text,
+                Bookmarked: false,
+                LikeAmount: 0,
+                Liked: false,
+                ReplyAmount: 0,
+                RepostAmount: 0,
+                Reposted: false,
+                userId: User?.user.id!,
+                User: {
+                    email: User?.user.email!,
+                    id: User?.user.id!,
+                    image: User?.user.image!,
+                    name: User?.user.name!,
+                    username: User?.user.username!
+                },
+            }
+            queryClient.setQueryData(["getTweets"], (old: tweetsType[]) => [optimisTicData, ...old])
+
+            return { previousData }
+        },
+        onSettled: (data) => {
             setText("")
             queryClient.invalidateQueries({ queryKey: ['getTweets'] })
         },
-        onError: (err: any) => {
+        onError: (err: any, _, context) => {
+            queryClient.setQueryData(["getTweets"], () => context?.previousData);
             toast({
                 title: "Something went wrong",
                 description: err?.response.data.message,
@@ -48,9 +74,9 @@ const TweetCard: FC<TweetCardProps> = () => {
             <div className="flex">
                 <CardHeader className="p-4">
                     <Avatar className="relative">
-                        <Link href={`/${data?.user.username}`} className="w-full h-full absolute" />
-                        <AvatarImage src={data?.user.image ?? ''} />
-                        <AvatarFallback>{data?.user.name?.at(0)?.toUpperCase()}</AvatarFallback>
+                        <Link href={`/${User?.user.username}`} className="w-full h-full absolute" />
+                        <AvatarImage src={User?.user.image ?? ''} />
+                        <AvatarFallback>{User?.user.name?.at(0)?.toUpperCase()}</AvatarFallback>
                     </Avatar>
                 </CardHeader>
                 <CardContent className="flex-grow p-4">
@@ -66,7 +92,7 @@ const TweetCard: FC<TweetCardProps> = () => {
             <CardFooter className="justify-end p-4">
                 <Button
                     disabled={text.length < 1 || isPending}
-                    onClick={() => CreateNewPost({ text, userId: data?.user.id as string })}>
+                    onClick={() => CreateNewPost({ text, userId: User?.user.id as string })}>
                     {isPending ? <SpinnerLoader />
                         :
                         "Post"

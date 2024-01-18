@@ -1,3 +1,4 @@
+import { ProfileType } from "@/app/api/profile/[username]/route";
 import { tweetsType } from "@/app/api/tweet/route";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,37 +10,58 @@ interface RepostButtonProps {
     userId: string;
     tweetId: string;
     Reposted: boolean;
+    queryKey: string;
 }
 
-const RepostButton: FC<RepostButtonProps> = ({ userId, tweetId, Reposted }) => {
+const RepostButton: FC<RepostButtonProps> = ({ userId, tweetId, Reposted, queryKey }) => {
     const queryClient = useQueryClient()
+    const [key, setKey] = useState<string>(queryKey)
     const [reposted, setReposted] = useState<boolean>(Reposted)
+
     useEffect(() => {
         setReposted(Reposted)
     }, [Reposted])
+    useEffect(() => {
+        setKey(queryKey)
+    }, [queryKey])
 
     const { mutate: repostHandler, isPending: loadingRepost } = useMutation({
         mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => await axios.post(`/api/tweet/repost`, { tweetId, userId }),
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
-            await queryClient.cancelQueries({ queryKey: ["getTweets"] })
-
-            const previousTweet = queryClient.getQueryData<tweetsType[]>(["getTweets"])
-            queryClient.setQueryData(["getTweets"], (previousTweet?.map((item) => {
-                if (item.id === tweetId) {
-                    if (item.Reposted) {
-                        return ({ ...item, RepostAmount: item.RepostAmount - 1, Reposted: false })
+            await queryClient.cancelQueries({ queryKey: [key] })
+            const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
+            if (key === "getProfile") {
+                queryClient.setQueryData(["getProfile"], {
+                    ...previousData,
+                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                        if (item.id === tweetId) {
+                            if (item.Reposted) {
+                                return { ...item, RepostAmount: item.RepostAmount - 1, Reposted: false };
+                            }
+                            return { ...item, RepostAmount: item.RepostAmount + 1, Reposted: true };
+                        } else {
+                            return { ...item };
+                        }
+                    })
+                } as ProfileType)
+            } else {
+                queryClient.setQueryData([key], ((previousData as tweetsType[])?.map((item) => {
+                    if (item.id === tweetId) {
+                        if (item.Reposted) {
+                            return ({ ...item, RepostAmount: item.RepostAmount - 1, Reposted: false })
+                        }
+                        return ({ ...item, RepostAmount: item.RepostAmount + 1, Reposted: true })
                     }
-                    return ({ ...item, RepostAmount: item.RepostAmount + 1, Reposted: true })
-                }
-                else {
-                    return ({ ...item })
-                }
-            })))
+                    else {
+                        return ({ ...item })
+                    }
+                })))
+            }
 
-            return { previousTweet }
+            return { previousData }
         },
         onError: (_, __, context) => {
-            queryClient.setQueryData(["getTweets"], () => context?.previousTweet);
+            queryClient.setQueryData(["getTweets"], () => context?.previousData);
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["getTweets"] })

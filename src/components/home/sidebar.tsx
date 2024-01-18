@@ -1,10 +1,8 @@
 "use client"
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { buttonVariants } from "../ui/button";
-
-
 import Link from "next/link";
-import { Bell, Home, Mail, Search, User } from "lucide-react";
+import { Bell, Bookmark, Home, Mail, Search, User } from "lucide-react";
 import ProfileButton from "./sidebarComponent/ProfileButton";
 import PostButton from "./sidebarComponent/PostButton";
 import MoreButton from "./sidebarComponent/MoreButton";
@@ -36,6 +34,10 @@ export default function MainSidebar() {
                     <Link href="/messages" className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <Mail />
                         <span className="text-lg font-semibold">Messages</span>
+                    </Link>
+                    <Link href="/bookmarks" className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
+                        <Bookmark />
+                        <span className="text-lg font-semibold">Bookmarks</span>
                     </Link>
                     <Link href={`/${session?.user.username}`} className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <User />

@@ -27,13 +27,13 @@ const ProfileCard: FC<ProfileCardProps> = ({ trigger, name, username, avatar, cl
                     () => {
                         if (trigger === "name") {
                             return (
-                                <Link href={`/${username}`}>
+                                <Link href={`/profile/${username}`}>
                                     <CardTitle className={cn("text-base font-bold p-0 m-0 hover:underline cursor-pointer", className)}>{name}</CardTitle>
                                 </Link>
                             )
                         } else if (trigger === "avatar") {
                             return (
-                                <Link href={`/${username}`}>
+                                <Link href={`/profile/${username}`}>
                                     <Avatar className={cn("hover:opacity-80 transition ease-in cursor-pointer", className)}>
                                         <AvatarImage src={avatar} />
                                         <AvatarFallback>{name?.at(0)?.toUpperCase()}</AvatarFallback>
@@ -42,7 +42,7 @@ const ProfileCard: FC<ProfileCardProps> = ({ trigger, name, username, avatar, cl
                             )
                         } else {
                             return (
-                                <Link href={`/${username}`}>
+                                <Link href={`/profile/${username}`}>
                                     <CardDescription className={cn("cursor-pointer", className)}>@{username}</CardDescription>
                                 </Link>
                             )
@@ -57,8 +57,8 @@ const ProfileCard: FC<ProfileCardProps> = ({ trigger, name, username, avatar, cl
                             <AvatarImage src={avatar} />
                             <AvatarFallback>{name?.at(0)?.toUpperCase()}</AvatarFallback>
                         </Avatar>
-                        <Link href={"/"} className="hover:underline text-lg">{name}</Link>
-                        <Link href={"/"} className="text-muted-foreground">@{username}</Link>
+                        <Link href={`/profile/${username}`} className="hover:underline text-lg">{name}</Link>
+                        <Link href={`/profile/${username}`} className="text-muted-foreground">@{username}</Link>
                     </CardHeader>
                     <Button className="h-fit">Follow</Button>
                 </div>

@@ -3,6 +3,7 @@
 import { ProfileType } from "@/app/api/profile/[username]/route";
 import { tweetsType } from "@/app/api/tweet/route";
 import TweetsList from "@/components/home/main/TweetsList";
+import EditProfileDialog from "@/components/home/profile/EditProfileDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,8 +12,9 @@ import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { Calendar } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 interface ProfilePageProps {
     params: {
@@ -23,6 +25,12 @@ interface ProfilePageProps {
 const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
     const { toast } = useToast()
     const { data: User, status } = useSession()
+    const [username, setUsername] = useState<string>(params.username)
+
+    useEffect(() => {
+        setUsername(params.username)
+    }, [params.username])
+
     const { data: ProfileData, isPending: ProfileLoading, isError } = useQuery({
         queryKey: ["getProfile"],
         queryFn: async () => {
@@ -69,7 +77,8 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                                 <CardTitle>{ProfileData?.name}</CardTitle>
                                 <CardDescription>@{ProfileData?.username}</CardDescription>
                             </div>
-                            <CardDescription>{new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(ProfileData?.createdAt as Date))}</CardDescription>
+                            <p>{ProfileData?.bio}</p>
+                            <CardDescription className="flex items-center gap-2"><Calendar size={14} /> {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(ProfileData?.createdAt as Date))}</CardDescription>
                             <div className="flex gap-4">
                                 <div className="flex gap-2">
                                     <CardTitle className="text-base">14K</CardTitle>
@@ -82,8 +91,12 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                             </div>
                         </CardContent>
                         <CardFooter className="p-4">
-                            {User?.user.username === ProfileData?.username ?
-                                <Button variant="outline" type="button">Edit Profile</Button> :
+                            {username === ProfileData?.username ?
+                                <EditProfileDialog
+                                    username={ProfileData?.username as string}
+                                    name={ProfileData?.name as string}
+                                    image={ProfileData?.image as string}
+                                    bio={ProfileData?.bio} /> :
                                 <Button type="button">Following</Button>
                             }
                         </CardFooter>

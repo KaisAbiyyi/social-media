@@ -74,7 +74,7 @@ const TweetCard: FC<TweetCardProps> = () => {
             <div className="flex">
                 <CardHeader className="p-4">
                     <Avatar className="relative">
-                        <Link href={`/${User?.user.username}`} className="w-full h-full absolute" />
+                        <Link href={`/profile/${User?.user.username}`} className="w-full h-full absolute" />
                         <AvatarImage src={User?.user.image ?? ''} />
                         <AvatarFallback>{User?.user.name?.at(0)?.toUpperCase()}</AvatarFallback>
                     </Avatar>

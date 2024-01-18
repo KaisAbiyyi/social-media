@@ -9,6 +9,7 @@ export type ProfileType = {
     username: string;
     image: string;
     createdAt: Date;
+    bio: string
     Tweet: tweetsType[] | null
 }
 
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
                     },
                     Like: true,
                     Bookmark: true,
-                    Reply: true,
+                    replies: true,
                     Repost: true,
                     User: true
                 },
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
                             },
                             Like: true,
                             Bookmark: true,
-                            Reply: true,
+                            replies: true,
                             Repost: true,
                             User: true
                         },
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         Bookmarked: !!(tweet.Bookmark.find((item: Bookmark) => item.userId === session?.id)),
         RepostAmount: tweet.Repost.length,
         Reposted: !!(tweet.Repost.find((item: Repost) => item.userId === session?.id)),
-        ReplyAmount: tweet.Reply.length,
+        ReplyAmount: tweet.replies.length,
         User: {
             id: tweet.User.id as string,
             name: tweet.User.name as string,
@@ -111,7 +112,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         Bookmarked: !!(tweet.Tweet.Bookmark.find((item: Bookmark) => item.userId === session?.id)),
         RepostAmount: tweet.Tweet.Repost.length,
         Reposted: !!(tweet.Tweet.Repost.find((item: Repost) => item.userId === session?.id)),
-        ReplyAmount: tweet.Tweet.Reply.length,
+        ReplyAmount: tweet.Tweet.replies.length,
         User: {
             id: tweet.Tweet.User.id as string,
             name: tweet.Tweet.User.name as string,
@@ -129,6 +130,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         username: getUser.username as string,
         image: getUser.image as string,
         createdAt: getUser.createdAt as Date,
+        bio: getUser.bio as string,
         Tweet
     }
 
@@ -137,4 +139,47 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         message: "User found!",
         data
     }, { status: 200 })
+}
+
+
+export async function POST(request: Request, { params }: { params: { username: string } }) {
+    try {
+        const { newUsername, newName, newBio } = await request.json()
+        console.log(newBio)
+        const username = params.username
+        const findUser = await prisma.user.findUnique({
+            where: {
+                username
+            }
+        })
+
+        if (!findUser) {
+            return NextResponse.json({
+                success: false
+            }, { status: 404 })
+        }
+
+        const data = await prisma.user.update({
+            where: {
+                id: findUser.id
+            },
+            data: {
+                name: newName,
+                username: newUsername,
+                bio: newBio
+            }
+        })
+
+        return NextResponse.json({
+            success: true,
+            message: "Profile Updated!",
+            data
+        }, { status: 200 })
+
+    } catch (error) {
+        console.log(error)
+        return NextResponse.json({
+            success: false
+        }, { status: 403 })
+    }
 }

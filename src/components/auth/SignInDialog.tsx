@@ -1,20 +1,20 @@
 "use client"
 
-import { FC, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { Button, buttonVariants } from "../ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
-import { Separator } from "../ui/separator";
-import * as z from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button, buttonVariants } from "../ui/button";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
-import { useRouter } from "next/navigation";
-import { useToast } from "../ui/use-toast";
-import { ToastAction } from "../ui/toast";
-import { Card, CardContent, CardHeader } from "../ui/card";
+import { Separator } from "../ui/separator";
 import SpinnerLoader from "../ui/spinner";
+import { ToastAction } from "../ui/toast";
+import { useToast } from "../ui/use-toast";
 
 const formSchema = z.object({
     email: z.string().min(1, {

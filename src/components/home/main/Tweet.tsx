@@ -40,7 +40,7 @@ const Tweet: FC<TweetProps> = ({ tweet, queryKey, index, array }) => {
             </div>
         }
         <div className={buttonVariants({ variant: "ghost", className: "relative !px-0 w-full flex flex-col h-full rounded-none !py-0" })} key={tweet.id}>
-            <Link href={`/${tweet.User.username}/status/${tweet.id}`} className="absolute z-0 w-full h-full" />
+            <Link href={`/profile/${tweet.User.username}/status/${tweet.id}`} className="absolute z-0 w-full h-full" />
             <div className="flex w-full">
                 <CardHeader className="p-4">
                     <ProfileCard className="z-10" avatar={tweet.User.image as string} trigger="avatar" name={tweet.User.name as string} username={tweet.User.username as string} />

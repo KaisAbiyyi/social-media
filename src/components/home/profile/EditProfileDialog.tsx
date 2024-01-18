@@ -1,39 +1,35 @@
+import { ProfileType } from "@/app/api/profile/[username]/route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import * as z from "zod"
 import {
     Dialog,
     DialogContent,
     DialogTrigger
 } from "@/components/ui/dialog";
-import { FC, useState } from "react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ToastAction } from "@/components/ui/toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import ReactTextareaAutosize from "react-textarea-autosize";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { ProfileType } from "@/app/api/profile/[username]/route";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/textarea";
+import { FC, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 interface EditProfileDialogProps {
     name: string;
     username?: string;
     bio?: string;
-    image?: string
+    image?: string;
 }
 
 const formSchema = z.object({
     newName: z.string().min(1, {
         message: "Name cannot null.",
-    }),
-    newUsername: z.string().min(1, {
-        message: "Username cannot null.",
     }),
     newBio: z.string()
 
@@ -45,23 +41,22 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
     const [open, setOpen] = useState<boolean>(false)
     const queryClient = useQueryClient()
     const router = useRouter()
-    const [users, setUsers] = useState<object>({ newName: name, newUsername: username, newBio: bio ?? "" })
+    const [users, setUsers] = useState<object>({ newName: name, newBio: bio ?? "" })
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: users,
     })
 
     const { mutate: handleSubmit, isPending } = useMutation({
-        mutationFn: async ({ newName, newUsername, newBio }: z.infer<typeof formSchema>) => await axios.post(`/api/profile/${username}`, { newName, newUsername, newBio }),
-        onMutate: async ({ newName, newUsername, newBio }: z.infer<typeof formSchema>) => {
+        mutationFn: async ({ newName, newBio }: z.infer<typeof formSchema>) => await axios.post(`/api/profile/${username}`, { newName, newBio }),
+        onMutate: async ({ newName, newBio }: z.infer<typeof formSchema>) => {
             await queryClient.cancelQueries({ queryKey: ["getProfile"] })
             const previousData = queryClient.getQueryData<ProfileType>(["getProfile"])
             queryClient.setQueryData(["getProfile"], {
-                bio: newBio,
-                username: newUsername,
+                ...previousData,
                 name: newName,
-                ...previousData
-            })
+                bio: newBio,
+            } as ProfileType)
             setOpen(false)
             return { previousData }
         },
@@ -74,7 +69,8 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
             })
         },
         onSettled: (data) => {
-            router.replace(`/profile/${data?.data.data.username}`)
+            queryClient.invalidateQueries({ queryKey: ["getProfile"] })
+            router.push(`/profile/${data?.data.data.username}`)
         }
     })
 
@@ -91,7 +87,7 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
                     </CardHeader>
                     <CardContent className="flex flex-col flex-grow p-4">
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(async (values: z.infer<typeof formSchema>) => handleSubmit({ newUsername: values.newUsername, newName: values.newName, newBio: values.newBio }))} className="space-y-8">
+                            <form onSubmit={form.handleSubmit(async (values: z.infer<typeof formSchema>) => handleSubmit({ newName: values.newName, newBio: values.newBio }))} className="space-y-8">
                                 <FormField
                                     control={form.control}
                                     name="newName"
@@ -100,19 +96,6 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
                                             <FormLabel>Name</FormLabel>
                                             <FormControl>
                                                 <Input type="text" placeholder="Enter your name here..." {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="newUsername"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Username</FormLabel>
-                                            <FormControl>
-                                                <Input type="text" placeholder="Enter your username here..." {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -139,7 +122,7 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
                     </CardContent>
                 </Card>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 }
 

@@ -3,7 +3,7 @@
 
 import TweetCard from "@/components/home/main/TweetCard";
 import TweetsList from "@/components/home/main/TweetsList";
-import TweetsListSkeleton from "@/components/home/main/components/TweetsListSkeleton";
+import SpinnerLoader from "@/components/ui/spinner";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -32,7 +32,9 @@ export default function HomePage() {
         <div className="flex flex-col gap-4">
             <TweetCard />
             {isPending ?
-                <TweetsListSkeleton /> :
+                <div className="flex justify-center">
+                    <SpinnerLoader />
+                </div> :
                 <TweetsList data={data} queryKey="getTweets" />
             }
         </div>

@@ -1,7 +1,6 @@
 "use client"
 
 import TweetsList from "@/components/home/main/TweetsList";
-import TweetsListSkeleton from "@/components/home/main/components/TweetsListSkeleton";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,6 +9,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import SpinnerLoader from "@/components/ui/spinner";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -65,8 +65,15 @@ const BookmarksPage: FC<BookmarksPageProps> = () => {
                 </CardFooter>
             </Card>
             {BookmarksPending ?
-                <TweetsListSkeleton /> :
-                <TweetsList data={BookmarksData} queryKey="getBookmarks" />
+                <div className="flex justify-center">
+                    <SpinnerLoader />
+                </div> :
+                BookmarksData.length > 0 ?
+                    <TweetsList data={BookmarksData} queryKey="getBookmarks" /> :
+                    <CardHeader className="mx-auto">
+                        <CardTitle className="text-center">Save Posts for Later</CardTitle>
+                        <CardDescription>Bookmark posts to easily find them again in the future</CardDescription>
+                    </CardHeader>
             }
         </div>
     );

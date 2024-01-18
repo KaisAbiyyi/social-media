@@ -24,13 +24,7 @@ interface ProfilePageProps {
 
 const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
     const { toast } = useToast()
-    const { data: User, status } = useSession()
-    const [username, setUsername] = useState<string>(params.username)
-
-    useEffect(() => {
-        setUsername(params.username)
-    }, [params.username])
-
+    const { data: User, status, update } = useSession()
     const { data: ProfileData, isPending: ProfileLoading, isError } = useQuery({
         queryKey: ["getProfile"],
         queryFn: async () => {
@@ -91,7 +85,7 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                             </div>
                         </CardContent>
                         <CardFooter className="p-4">
-                            {username === ProfileData?.username ?
+                            {User?.user.username === ProfileData?.username ?
                                 <EditProfileDialog
                                     username={ProfileData?.username as string}
                                     name={ProfileData?.name as string}

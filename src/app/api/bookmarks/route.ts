@@ -12,7 +12,7 @@ type Bookmark = Prisma.BookmarkGetPayload<{
                 Like: true,
                 Bookmark: true,
                 Repost: true,
-                Reply: true,
+                replies: true,
                 quote: {
                     include: {
                         User: true
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
                     Like: true,
                     Bookmark: true,
                     Repost: true,
-                    Reply: true,
+                    replies: true,
                     quote: {
                         include: {
                             User: true
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
         Bookmarked: !!(item.Tweet.Bookmark.find((item) => item.userId === token?.id)),
         RepostAmount: item.Tweet.Repost.length,
         Reposted: !!(item.Tweet.Repost.find((item: Repost) => item.userId === token?.id)),
-        ReplyAmount: item.Tweet.Reply.length,
+        ReplyAmount: item.Tweet.replies.length,
         User: {
             id: item.Tweet.User.id,
             image: item.Tweet.User.image as string,

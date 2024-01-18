@@ -39,7 +39,7 @@ export default function MainSidebar() {
                         <Bookmark />
                         <span className="text-lg font-semibold">Bookmarks</span>
                     </Link>
-                    <Link href={`/${session?.user.username}`} className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
+                    <Link href={`/profile/${session?.user.username}`} className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <User />
                         <span className="text-lg font-semibold">Profile</span>
                     </Link>

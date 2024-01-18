@@ -144,8 +144,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
 
 export async function POST(request: Request, { params }: { params: { username: string } }) {
     try {
-        const { newUsername, newName, newBio } = await request.json()
-        console.log(newBio)
+        const { newName, newBio } = await request.json()
         const username = params.username
         const findUser = await prisma.user.findUnique({
             where: {
@@ -165,7 +164,6 @@ export async function POST(request: Request, { params }: { params: { username: s
             },
             data: {
                 name: newName,
-                username: newUsername,
                 bio: newBio
             }
         })

@@ -27,7 +27,7 @@ const TweetsList: FC<TweetsListType> = ({ data, queryKey }) => {
         {tweets.length > 0 &&
             <Card className="overflow-hidden">
                 {tweets.map((tweet: tweetsType, index: number, array: tweetsType[]) => (
-                    <Tweet tweet={tweet} index={index} array={array} queryKey={queryKey} />
+                    <Tweet tweet={tweet} index={index} array={array} queryKey={queryKey} key={tweet.id}/>
                 ))}
             </Card >
         }

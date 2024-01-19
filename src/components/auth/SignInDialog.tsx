@@ -15,23 +15,17 @@ import { Separator } from "../ui/separator";
 import SpinnerLoader from "../ui/spinner";
 import { ToastAction } from "../ui/toast";
 import { useToast } from "../ui/use-toast";
+import { CredentialLoginValidator, CredentialPayload } from "@/lib/validators/CredentialLoginValidator";
 
-const formSchema = z.object({
-    email: z.string().min(1, {
-        message: "Email cannot null.",
-    }).email(),
-    password: z.string().min(1, {
-        message: "Password cannot null.",
-    }),
-})
+
 
 const SignInDialog: FC = () => {
     const router = useRouter()
     const [open, setOpen] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const { toast } = useToast()
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<CredentialPayload>({
+        resolver: zodResolver(CredentialLoginValidator),
         defaultValues: {
             email: "",
             password: '',
@@ -54,7 +48,7 @@ const SignInDialog: FC = () => {
                             </div>
                             <Separator />
                             <Form {...form}>
-                                <form onSubmit={form.handleSubmit(async (values: z.infer<typeof formSchema>) => {
+                                <form onSubmit={form.handleSubmit(async (values: CredentialPayload) => {
                                     try {
                                         setIsLoading(true)
                                         const login = await signIn("credentials", { email: values.email, password: values.password, redirect: false })

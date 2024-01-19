@@ -1,3 +1,4 @@
+import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Bookmark, Like, Prisma, Repost } from "@prisma/client";
 import { getToken } from "next-auth/jwt";
@@ -22,6 +23,9 @@ export type tweetsType = {
         image: string;
         username: string;
         email: string;
+        followers: number;
+        following: number;
+        followed: boolean;
     },
     quote?: {
         id: string;
@@ -38,7 +42,12 @@ export type tweetsType = {
 
 type Tweet = Prisma.TweetGetPayload<{
     include: {
-        User: true,
+        User: {
+            include: {
+                followers: true,
+                following: true
+            }
+        },
         Like: true,
         Bookmark: true,
         Repost: true,
@@ -57,7 +66,12 @@ export async function GET(req: NextRequest) {
 
     const tweets = await prisma.tweet.findMany({
         include: {
-            User: true,
+            User: {
+                include: {
+                    followers: true,
+                    following: true
+                }
+            },
             Like: true,
             Bookmark: true,
             Repost: true,
@@ -94,7 +108,10 @@ export async function GET(req: NextRequest) {
                 image: item.User.image as string,
                 name: item.User.name as string,
                 username: item.User.username as string,
-                email: item.User.email as string
+                email: item.User.email as string,
+                followers: item.User.followers.length,
+                following: item.User.following.length,
+                followed: session?.id === item.User.id ? false : !!((item.User.followers.find((item) => item.followerId === session?.id!))),
             },
             quote: item.quote ? {
                 id: item.quote.id as string,
@@ -118,6 +135,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(request: Request) {
     try {
+        const session = await getAuthSession()
+        if (!session?.user) {
+            return NextResponse.json({
+                success: false,
+                message: "Unauthorized"
+            }, { status: 401 })
+        }
+
         const body = await request.json()
         const { text, userId, userTweetId, tweetId } = body
         const requiredFields = ["text", "userId"];

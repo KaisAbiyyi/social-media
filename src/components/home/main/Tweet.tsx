@@ -1,29 +1,28 @@
+"use client"
+
 import { tweetsType } from "@/app/api/tweet/route";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, RefreshCcw } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import DeleteButton from "./components/DeleteButton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import ReplyButton from "./components/ReplyButton";
-import { MoreHorizontal, RefreshCcw } from "lucide-react";
-import { useSession } from "next-auth/react";
-import RepostButton from "./components/RepostButton";
-import QuoteButton from "./components/QuoteButton";
-import LikeButton from "./components/LikeButton";
 import BookmarkButton from "./components/BookmarkButton";
-import { Separator } from "@radix-ui/react-dropdown-menu";
+import DeleteButton from "./components/DeleteButton";
+import LikeButton from "./components/LikeButton";
+import QuoteButton from "./components/QuoteButton";
+import ReplyButton from "./components/ReplyButton";
+import RepostButton from "./components/RepostButton";
 
 interface TweetProps {
     tweet: tweetsType;
     queryKey: string;
-    index: number;
-    array: tweetsType[];
 }
 
-const Tweet: FC<TweetProps> = ({ tweet, queryKey, index, array }) => {
+const Tweet: FC<TweetProps> = ({ tweet, queryKey }) => {
     const [key, setKey] = useState<string>(queryKey)
     const { data: user, status } = useSession()
 
@@ -32,24 +31,52 @@ const Tweet: FC<TweetProps> = ({ tweet, queryKey, index, array }) => {
     }, [queryKey])
 
     return (<>
-        {tweet.Reposting &&
-            <div className="flex w-full items-center" key={tweet.id}>
-                <CardHeader className="p-4">
-                    <CardDescription className="flex gap-2 items-center"><RefreshCcw size={12} /> @{user?.user.username} reposted</CardDescription>
-                </CardHeader>
-            </div>
-        }
         <div className={buttonVariants({ variant: "ghost", className: "relative !px-0 w-full flex flex-col h-full rounded-none !py-0" })} key={tweet.id}>
+            {tweet.Reposting &&
+                <div className="flex w-full items-center" key={tweet.id}>
+                    <CardHeader className="p-4">
+                        <CardDescription className="flex gap-2 items-center"><RefreshCcw size={12} /> @{user?.user.username} reposted</CardDescription>
+                    </CardHeader>
+                </div>
+            }
             <Link href={`/profile/${tweet.User.username}/status/${tweet.id}`} className="absolute z-0 w-full h-full" />
             <div className="flex w-full">
                 <CardHeader className="p-4">
-                    <ProfileCard className="z-10" avatar={tweet.User.image as string} trigger="avatar" name={tweet.User.name as string} username={tweet.User.username as string} />
+                    <ProfileCard
+                        followed={tweet.User.followed}
+                        followers={tweet.User.followers}
+                        following={tweet.User.following}
+                        username={tweet.User.username}
+                        name={tweet.User.name}
+                        image={tweet.User.image}
+                        trigger="avatar"
+                        tweetId={tweet.id}
+                        queryKey={key}
+                        className="z-10" />
                 </CardHeader>
                 <CardContent className="flex flex-col flex-grow p-0">
                     <CardHeader className="flex flex-row space-y-0 p-4 !items-center justify-between">
                         <div className="flex gap-4 items-center">
-                            <ProfileCard avatar={tweet.User.image as string} trigger="name" name={tweet.User.name as string} username={tweet.User.username as string} />
-                            <ProfileCard avatar={tweet.User.image as string} trigger="username" name={tweet.User.name as string} username={tweet.User.username as string} />
+                            <ProfileCard
+                                followed={tweet.User.followed}
+                                followers={tweet.User.followers}
+                                following={tweet.User.following}
+                                username={tweet.User.username}
+                                name={tweet.User.name}
+                                image={tweet.User.image}
+                                tweetId={tweet.id}
+                                queryKey={key}
+                                trigger="name" />
+                            <ProfileCard
+                                tweetId={tweet.id}
+                                followed={tweet.User.followed}
+                                followers={tweet.User.followers}
+                                following={tweet.User.following}
+                                username={tweet.User.username}
+                                name={tweet.User.name}
+                                image={tweet.User.image}
+                                queryKey={key}
+                                trigger="username" />
                         </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", size: "sm", className: "z-40" })}><MoreHorizontal /></DropdownMenuTrigger>
@@ -130,10 +157,6 @@ const Tweet: FC<TweetProps> = ({ tweet, queryKey, index, array }) => {
                 </CardContent>
             </div>
         </div>
-        {index !== array.length - 1 ?
-            <Separator /> :
-            ""
-        }
     </>);
 }
 

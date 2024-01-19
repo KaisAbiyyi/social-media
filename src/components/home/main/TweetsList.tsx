@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/card";
 import { FC, useEffect, useState } from "react";
 import Tweet from "./Tweet";
+import { Separator } from "@/components/ui/separator";
 
 type TweetsListType = {
     data: tweetsType[],
@@ -27,7 +28,13 @@ const TweetsList: FC<TweetsListType> = ({ data, queryKey }) => {
         {tweets.length > 0 &&
             <Card className="overflow-hidden">
                 {tweets.map((tweet: tweetsType, index: number, array: tweetsType[]) => (
-                    <Tweet tweet={tweet} index={index} array={array} queryKey={queryKey} key={tweet.id}/>
+                    <>
+                        <Tweet tweet={tweet} queryKey={queryKey} key={tweet.id} />
+                        {index !== array.length - 1 ?
+                            <Separator /> :
+                            ""
+                        }
+                    </>
                 ))}
             </Card >
         }

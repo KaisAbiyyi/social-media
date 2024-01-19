@@ -1,25 +1,66 @@
 import { prisma } from "@/lib/db"
 import { NextRequest, NextResponse } from "next/server"
 import { tweetsType } from "../route"
-import { Bookmark, Like, Repost } from "@prisma/client"
+import { Bookmark, Like, Prisma, Repost } from "@prisma/client"
 import { getToken } from "next-auth/jwt"
 
 export type ReplyType = {
-    id: string;
-    tweetId: string;
+    Reposting?: boolean;
+    id?: string;
     userId: string;
     text: string;
-    createdAt: Date;
-    updatedAt: Date;
+    repliedId?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    LikeAmount: number;
+    Liked: boolean;
+    Bookmarked: boolean;
+    RepostAmount: number;
+    Reposted: boolean;
+    ReplyAmount: number;
     User: {
         id: string;
         name: string;
         image: string;
         username: string;
         email: string;
-    }
+        followers: number;
+        following: number;
+        followed: boolean;
+    },
+    quote?: {
+        id: string;
+        text: string;
+        createdAt: Date;
+        updatedAt: Date;
+        User: {
+            name: string;
+            image: string;
+            username: string;
+        }
+    } | null,
     replies?: ReplyType[];
 }
+
+type Tweet = Prisma.TweetGetPayload<{
+    include: {
+        User: {
+            include: {
+                followers: true,
+                following: true
+            }
+        },
+        Like: true,
+        Bookmark: true,
+        Repost: true,
+        replies: true,
+        quote: {
+            include: {
+                User: true
+            }
+        }
+    }
+}>
 
 export async function DELETE(request: Request, { params }: { params: { tweetId: string } }) {
     try {
@@ -54,98 +95,144 @@ export async function DELETE(request: Request, { params }: { params: { tweetId: 
     }
 }
 
-// export async function GET(req: NextRequest, { params }: { params: { tweetId: string } }) {
-//     try {
-//         const session = await getToken({ req })
-//         const tweetId = params.tweetId
-//         const Tweet = await prisma.tweet.findFirst({
-//             where: {
-//                 id: tweetId
-//             },
-//             include: {
-//                 User: true,
-//                 Like: true,
-//                 Bookmark: true,
-//                 Repost: true,
-//                 Reply: {
-//                     include: {
-//                         replies: true,
-//                         replied: true,
-//                         User: true
-//                     },
-//                 },
-//                 quote: {
-//                     include: {
-//                         User: true
-//                     }
-//                 }
-//             }
-//         })
+export async function GET(req: NextRequest, { params }: { params: { tweetId: string } }) {
+    try {
+        const session = await getToken({ req })
+        const tweetId = params.tweetId
+        const Tweet = await prisma.tweet.findFirst({
+            where: {
+                id: tweetId
+            },
+            include: {
+                User: {
+                    include: {
+                        followers: true,
+                        following: true,
+                    }
+                },
+                Like: true,
+                Bookmark: true,
+                Repost: true,
+                replies: {
+                    include: {
+                        replies: true,
+                        User: {
+                            include: {
+                                followers: true,
+                                following: true,
+                            }
+                        },
+                        Like: true,
+                        Bookmark: true,
+                        Repost: true,
+                        quote: {
+                            include: {
+                                User: true
+                            }
+                        }
+                    },
+                },
+                quote: {
+                    include: {
+                        User: true
+                    }
+                }
+            }
+        })
 
-//         const tweet: tweetsType = {
-//             id: Tweet?.id,
-//             text: Tweet?.text!,
-//             userId: Tweet?.userId!,
-//             createdAt: Tweet?.createdAt,
-//             updatedAt: Tweet?.updatedAt,
-//             LikeAmount: Tweet?.Like.length ?? 0,
-//             Liked: !!(Tweet?.Like.find((item?: Like) => item?.userId === session?.id)),
-//             Bookmarked: !!(Tweet?.Bookmark.find((item?: Bookmark) => item?.userId === session?.id)),
-//             RepostAmount: Tweet?.Repost.length ?? 0,
-//             Reposted: !!(Tweet?.Repost.find((item?: Repost) => item?.userId === session?.id)),
-//             ReplyAmount: Tweet?.Reply.length ?? 0,
-//             User: {
-//                 id: Tweet?.User.id!,
-//                 image: Tweet?.User.image as string,
-//                 name: Tweet?.User.name as string,
-//                 username: Tweet?.User.username as string,
-//                 email: Tweet?.User.email as string
-//             },
-//             quote: Tweet?.quote ? {
-//                 id: Tweet?.quote.id as string,
-//                 text: Tweet?.quote?.text as string,
-//                 createdAt: Tweet?.quote?.createdAt as Date,
-//                 updatedAt: Tweet?.quote?.updatedAt as Date,
-//                 User: {
-//                     name: Tweet?.quote?.User.name as string,
-//                     username: Tweet?.quote?.User.username as string,
-//                     image: Tweet?.quote?.User.image as string
-//                 }
-//             } : null,
+        const tweet: tweetsType = {
+            id: Tweet?.id,
+            text: Tweet?.text!,
+            userId: Tweet?.userId!,
+            createdAt: Tweet?.createdAt,
+            updatedAt: Tweet?.updatedAt,
+            LikeAmount: Tweet?.Like.length ?? 0,
+            Liked: !!(Tweet?.Like.find((item?: Like) => item?.userId === session?.id)),
+            Bookmarked: !!(Tweet?.Bookmark.find((item?: Bookmark) => item?.userId === session?.id)),
+            RepostAmount: Tweet?.Repost.length ?? 0,
+            Reposted: !!(Tweet?.Repost.find((item?: Repost) => item?.userId === session?.id)),
+            ReplyAmount: Tweet?.replies.length ?? 0,
+            User: {
+                id: Tweet?.User.id!,
+                image: Tweet?.User.image as string,
+                name: Tweet?.User.name as string,
+                username: Tweet?.User.username as string,
+                email: Tweet?.User.email as string,
+                followers: Tweet?.User.followers.length ?? 0,
+                following: Tweet?.User.following.length ?? 0,
+                followed: session?.id === Tweet?.User.id ? false : !!((Tweet?.User.followers.find((item) => item.followerId === session?.id!))),
+            },
+            quote: Tweet?.quote ? {
+                id: Tweet?.quote.id as string,
+                text: Tweet?.quote?.text as string,
+                createdAt: Tweet?.quote?.createdAt as Date,
+                updatedAt: Tweet?.quote?.updatedAt as Date,
+                User: {
+                    name: Tweet?.quote?.User.name as string,
+                    username: Tweet?.quote?.User.username as string,
+                    image: Tweet?.quote?.User.image as string
+                }
+            } : null,
 
-//         }
+        }
 
-//         const replies: ReplyType[] = Tweet?.Reply.map((item) => ({
-//             id: item.id,
-//             text: item.text,
-//             tweetId: item.tweetId,
-//             userId: item.userId,
-//             createdAt:item.createdAt,
-//             updatedAt:item.updatedAt,
-//             User:{
-//                 id:item.User.id,
-//                 name:item.User.name,
-//                 username:item.User.username,
-//                 email:item.User.email,
-//                 image:item.User.image
-//             },
-//             replies: 
-//         }))
+        const repliesData = (data: any) => {
+            const temp: ReplyType[] = data.map((item: Tweet) => ({
+                id: item?.id,
+                text: item?.text!,
+                userId: item?.userId!,
+                createdAt: item?.createdAt,
+                updatedAt: item?.updatedAt,
+                repliedId: item?.repliedId as string,
+                LikeAmount: item?.Like.length ?? 0,
+                Liked: !!(item?.Like.find((item?: Like) => item?.userId === session?.id)),
+                Bookmarked: !!(item?.Bookmark.find((item?: Bookmark) => item?.userId === session?.id)),
+                RepostAmount: item?.Repost.length ?? 0,
+                Reposted: !!(item?.Repost.find((item?: Repost) => item?.userId === session?.id)),
+                ReplyAmount: item?.replies.length ?? 0,
+                User: {
+                    id: item?.User.id!,
+                    image: item?.User.image as string,
+                    name: item?.User.name as string,
+                    username: item?.User.username as string,
+                    email: item?.User.email as string,
+                    followers: item?.User.followers.length ?? 0,
+                    following: item?.User.following.length ?? 0,
+                    followed: session?.id === item?.User.id ? false : !!((item?.User.followers.find((item) => item.followerId === session?.id!))),
+                },
+                quote: item?.quote ? {
+                    id: item?.quote.id as string,
+                    text: item?.quote?.text as string,
+                    createdAt: item?.quote?.createdAt as Date,
+                    updatedAt: item?.quote?.updatedAt as Date,
+                    User: {
+                        name: item?.quote?.User.name as string,
+                        username: item?.quote?.User.username as string,
+                        image: item?.quote?.User.image as string
+                    }
+                } : null,
+                replies: repliesData(item.replies) as ReplyType[]
+            }))
 
-//         return NextResponse.json({
-//             success: true,
-//             message: "Tweet details",
-//             data: {
-//                 tweet,
-//                 replies
-//             }
-//         }, { status: 200 })
+            return temp
+        }
 
-//     } catch (error) {
-//         console.log(error)
-//         return NextResponse.json({
-//             success: false,
-//             message: "Something went wrong"
-//         }, { status: 403 })
-//     }
-// }
+        const replies: ReplyType[] = repliesData(Tweet?.replies as Tweet[])
+
+        return NextResponse.json({
+            success: true,
+            message: "Tweet details",
+            data: {
+                tweet,
+                replies
+            }
+        }, { status: 200 })
+
+    } catch (error) {
+        console.log(error)
+        return NextResponse.json({
+            success: false,
+            message: "Something went wrong"
+        }, { status: 403 })
+    }
+}

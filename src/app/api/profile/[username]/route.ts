@@ -9,7 +9,10 @@ export type ProfileType = {
     username: string;
     image: string;
     createdAt: Date;
-    bio: string
+    bio: string;
+    followers: number;
+    following: number;
+    followed: boolean;
     Tweet: tweetsType[] | null
 }
 
@@ -23,6 +26,8 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
             username
         },
         include: {
+            followers: true,
+            following: true,
             Tweet: {
                 include: {
                     quote: {
@@ -34,7 +39,12 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
                     Bookmark: true,
                     replies: true,
                     Repost: true,
-                    User: true
+                    User: {
+                        include: {
+                            followers: true,
+                            following: true
+                        }
+                    }
                 },
                 orderBy: {
                     createdAt: "desc"
@@ -53,7 +63,12 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
                             Bookmark: true,
                             replies: true,
                             Repost: true,
-                            User: true
+                            User: {
+                                include: {
+                                    followers: true,
+                                    following: true
+                                }
+                            }
                         },
                     }
                 }
@@ -68,7 +83,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         }, { status: 404 })
     }
 
-    const GeneralTweets = getUser?.Tweet.map((tweet) => ({
+    const GeneralTweets: tweetsType[] = getUser?.Tweet.map((tweet) => ({
         id: tweet.id,
         userId: tweet.userId,
         text: tweet.text,
@@ -86,6 +101,9 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
             image: tweet.User.image as string,
             username: tweet.User.username as string,
             email: tweet.User.email as string,
+            followers: tweet.User.followers.length,
+            following: tweet.User.following.length,
+            followed: session?.id === tweet.User.id ? false : !!((tweet.User.followers.find((item) => item.followerId === session?.id!))),
         },
         quote: tweet.quote ? {
             id: tweet.quote.User.id,
@@ -119,6 +137,9 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
             image: tweet.Tweet.User.image as string,
             username: tweet.Tweet.User.username as string,
             email: tweet.Tweet.User.email as string,
+            followers: tweet.Tweet.User.followers.length,
+            following: tweet.Tweet.User.following.length,
+            followed: session?.id === tweet.Tweet.User.id ? false : !!((tweet.Tweet.User.followers.find((item) => item.followerId === session?.id!))),
         },
     })) ?? []
 
@@ -131,6 +152,9 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         image: getUser.image as string,
         createdAt: getUser.createdAt as Date,
         bio: getUser.bio as string,
+        followers: getUser.followers.length,
+        following: getUser.following.length,
+        followed: session?.id === getUser.id ? false : !!((getUser.followers.find((item) => item.followerId === session?.id!))),
         Tweet
     }
 

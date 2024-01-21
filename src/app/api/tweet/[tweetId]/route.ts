@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { tweetsType } from "../route"
 import { Bookmark, Like, Prisma, Repost } from "@prisma/client"
 import { getToken } from "next-auth/jwt"
+import { getAuthSession } from "@/lib/auth"
 
 export type ReplyType = {
     Reposting?: boolean;
@@ -40,6 +41,11 @@ export type ReplyType = {
         }
     } | null,
     replies?: ReplyType[];
+}
+
+export type TweetDetailType = {
+    tweet: tweetsType,
+    replies: ReplyType[]
 }
 
 type Tweet = Prisma.TweetGetPayload<{
@@ -95,9 +101,15 @@ export async function DELETE(request: Request, { params }: { params: { tweetId: 
     }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { tweetId: string } }) {
+export async function GET(request: Request, { params }: { params: { tweetId: string } }) {
     try {
-        const session = await getToken({ req })
+        const session = await getAuthSession()
+        if (!session?.user) {
+            return NextResponse.json({
+                success: false,
+                message: "Unauthorized"
+            }, { status: 401 })
+        }
         const tweetId = params.tweetId
         const Tweet = await prisma.tweet.findFirst({
             where: {
@@ -147,10 +159,10 @@ export async function GET(req: NextRequest, { params }: { params: { tweetId: str
             createdAt: Tweet?.createdAt,
             updatedAt: Tweet?.updatedAt,
             LikeAmount: Tweet?.Like.length ?? 0,
-            Liked: !!(Tweet?.Like.find((item?: Like) => item?.userId === session?.id)),
-            Bookmarked: !!(Tweet?.Bookmark.find((item?: Bookmark) => item?.userId === session?.id)),
+            Liked: !!(Tweet?.Like.find((item?: Like) => item?.userId === session?.user.id)),
+            Bookmarked: !!(Tweet?.Bookmark.find((item?: Bookmark) => item?.userId === session?.user.id)),
             RepostAmount: Tweet?.Repost.length ?? 0,
-            Reposted: !!(Tweet?.Repost.find((item?: Repost) => item?.userId === session?.id)),
+            Reposted: !!(Tweet?.Repost.find((item?: Repost) => item?.userId === session?.user.id)),
             ReplyAmount: Tweet?.replies.length ?? 0,
             User: {
                 id: Tweet?.User.id!,
@@ -160,7 +172,7 @@ export async function GET(req: NextRequest, { params }: { params: { tweetId: str
                 email: Tweet?.User.email as string,
                 followers: Tweet?.User.followers.length ?? 0,
                 following: Tweet?.User.following.length ?? 0,
-                followed: session?.id === Tweet?.User.id ? false : !!((Tweet?.User.followers.find((item) => item.followerId === session?.id!))),
+                followed: session?.user.id === Tweet?.User.id ? false : !!((Tweet?.User.followers.find((item) => item.followerId === session?.user.id!))),
             },
             quote: Tweet?.quote ? {
                 id: Tweet?.quote.id as string,
@@ -173,7 +185,6 @@ export async function GET(req: NextRequest, { params }: { params: { tweetId: str
                     image: Tweet?.quote?.User.image as string
                 }
             } : null,
-
         }
 
         const repliesData = (data: any) => {
@@ -185,10 +196,10 @@ export async function GET(req: NextRequest, { params }: { params: { tweetId: str
                 updatedAt: item?.updatedAt,
                 repliedId: item?.repliedId as string,
                 LikeAmount: item?.Like.length ?? 0,
-                Liked: !!(item?.Like.find((item?: Like) => item?.userId === session?.id)),
-                Bookmarked: !!(item?.Bookmark.find((item?: Bookmark) => item?.userId === session?.id)),
+                Liked: !!(item?.Like.find((item?: Like) => item?.userId === session?.user.id)),
+                Bookmarked: !!(item?.Bookmark.find((item?: Bookmark) => item?.userId === session?.user.id)),
                 RepostAmount: item?.Repost.length ?? 0,
-                Reposted: !!(item?.Repost.find((item?: Repost) => item?.userId === session?.id)),
+                Reposted: !!(item?.Repost.find((item?: Repost) => item?.userId === session?.user.id)),
                 ReplyAmount: item?.replies.length ?? 0,
                 User: {
                     id: item?.User.id!,
@@ -198,7 +209,7 @@ export async function GET(req: NextRequest, { params }: { params: { tweetId: str
                     email: item?.User.email as string,
                     followers: item?.User.followers.length ?? 0,
                     following: item?.User.following.length ?? 0,
-                    followed: session?.id === item?.User.id ? false : !!((item?.User.followers.find((item) => item.followerId === session?.id!))),
+                    followed: session?.user.id === item?.User.id ? false : !!((item?.User.followers.find((item) => item.followerId === session?.user.id!))),
                 },
                 quote: item?.quote ? {
                     id: item?.quote.id as string,
@@ -225,7 +236,7 @@ export async function GET(req: NextRequest, { params }: { params: { tweetId: str
             data: {
                 tweet,
                 replies
-            }
+            } as TweetDetailType
         }, { status: 200 })
 
     } catch (error) {

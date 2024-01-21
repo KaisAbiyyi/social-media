@@ -13,7 +13,7 @@ export type ProfileType = {
     followers: number;
     following: number;
     followed: boolean;
-    Tweet: tweetsType[] | null
+    tweet: tweetsType[] | null
 }
 
 
@@ -143,7 +143,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         },
     })) ?? []
 
-    const Tweet: tweetsType[] = [...GeneralTweets, ...RepostedTweets].sort((a, b) => (new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()))
+    const tweet: tweetsType[] = [...GeneralTweets, ...RepostedTweets].sort((a, b) => (new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime()))
 
 
     const data: ProfileType = {
@@ -155,7 +155,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
         followers: getUser.followers.length,
         following: getUser.following.length,
         followed: session?.id === getUser.id ? false : !!((getUser.followers.find((item) => item.followerId === session?.id!))),
-        Tweet
+        tweet
     }
 
     return NextResponse.json({
@@ -168,7 +168,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
 
 export async function POST(request: Request, { params }: { params: { username: string } }) {
     try {
-        const { newName, newBio } = await request.json()
+        const { newName, newBio, newImg } = await request.json()
         const username = params.username
         const findUser = await prisma.user.findUnique({
             where: {
@@ -188,7 +188,8 @@ export async function POST(request: Request, { params }: { params: { username: s
             },
             data: {
                 name: newName,
-                bio: newBio
+                bio: newBio,
+                image: newImg
             }
         })
 

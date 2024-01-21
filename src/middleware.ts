@@ -13,8 +13,14 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
     const authMiddleware = withAuth({
         pages: {
             signIn: "/"
-        }
+        },
     })
 
     return authMiddleware(req as any, event);
 }
+
+export const config = {
+    matcher: [
+        '/((?!api|_next/static|_next/image|auth|favicon.ico|robots.txt|images|$).*)',
+    ],
+};

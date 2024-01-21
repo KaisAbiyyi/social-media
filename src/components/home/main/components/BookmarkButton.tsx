@@ -1,6 +1,8 @@
 import { ProfileType } from "@/app/api/profile/[username]/route";
+import { TweetDetailType } from "@/app/api/tweet/[tweetId]/route";
 import { tweetsType } from "@/app/api/tweet/route";
 import { Button } from "@/components/ui/button";
+import { ActionButtonPayload } from "@/lib/validators/ActionButtonValidator";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Bookmark } from "lucide-react";
@@ -26,14 +28,20 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
     }, [Bookmarked])
 
     const { mutate: bookmarkHandler, isPending: loadingBookmark } = useMutation({
-        mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => await axios.post(`/api/tweet/bookmark`, { tweetId, userId }),
+        mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
+            const payload: ActionButtonPayload = {
+                tweetId, userId
+            }
+
+            await axios.post(`/api/tweet/bookmark`, payload)
+        },
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
             await queryClient.cancelQueries({ queryKey: [queryKey] })
             const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
             if (key === "getProfile") {
                 queryClient.setQueryData([key], {
                     ...previousData,
-                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                    tweet: (previousData as ProfileType)?.tweet?.map((item: tweetsType) => {
                         if (item.id === tweetId) {
                             if (item.Bookmarked) {
                                 return { ...item, Bookmarked: false };
@@ -44,7 +52,17 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
                         }
                     })
                 } as ProfileType)
-            } else if (key === 'getBookmarks') {
+            } else if (key === "getTweetDetail") {
+                const previousData = queryClient.getQueryData<TweetDetailType>([key])
+                queryClient.setQueryData([key], {
+                    ...previousData,
+                    tweet: {
+                        ...previousData?.tweet,
+                        Bookmarked: previousData?.tweet.Bookmarked ? false : true
+                    } as tweetsType,
+                })
+            }
+            else if (key === 'getBookmarks') {
                 queryClient.setQueryData([key], (previousData as tweetsType[])?.filter((item: tweetsType) => item.id !== tweetId))
             } else {
                 queryClient.setQueryData([key], ((previousData as tweetsType[]).map((item: tweetsType) => {

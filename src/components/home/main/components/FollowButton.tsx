@@ -3,7 +3,6 @@ import { tweetsType } from "@/app/api/tweet/route";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { FollowUserPayload } from "@/lib/validators/FollowUserValidator";
-import { ToastAction } from "@radix-ui/react-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { FC, useEffect, useState } from "react";
@@ -34,13 +33,13 @@ const FollowButton: FC<FollowButtonProps> = ({ username, followed, queryKey, twe
         },
         onMutate: async () => {
             await queryClient.cancelQueries({ queryKey: [key] })
-            if (key === "getProfile") {
+            if (key === "getProfile" || key ==="getTweetDetail") {
                 const previousData = queryClient.getQueryData<ProfileType>([key])
                 queryClient.setQueryData([key], {
                     ...previousData,
                     followed: true,
                     followers: previousData?.followed ? (previousData.followers as number) - 1 : (previousData?.followers as number) + 1,
-                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                    tweet: (previousData as ProfileType)?.tweet?.map((item: tweetsType) => {
                         if (item.id === tweetId) {
                             if (item.User.followed) {
                                 return ({

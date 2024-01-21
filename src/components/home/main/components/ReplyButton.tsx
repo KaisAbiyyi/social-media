@@ -20,6 +20,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { tweetsType } from "@/app/api/tweet/route";
 import { ProfileType } from "@/app/api/profile/[username]/route";
+import { TweetDetailType } from "@/app/api/tweet/[tweetId]/route";
+import { ReplyButtonPayload } from "@/lib/validators/ActionButtonValidator";
 
 interface ReplyButtonProps {
     tweetId: string;
@@ -54,14 +56,19 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
     }, [queryKey])
 
     const { mutate: submitReply, isPending: replyPending } = useMutation({
-        mutationFn: async ({ tweetId, userId, text }: ReplyTweetType) => await axios.post("/api/tweet/reply", { userId, tweetId, text }),
+        mutationFn: async ({ tweetId, userId, text }: ReplyTweetType) => {
+            const payload: ReplyButtonPayload = {
+                tweetId, userId, text
+            }
+            await axios.post("/api/tweet/reply", payload)
+        },
         onMutate: async ({ tweetId }: { tweetId: string }) => {
             await queryClient.cancelQueries({ queryKey: [key] })
             const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
-            if (key === "getProfile") {
-                queryClient.setQueryData(["getProfile"], {
+            if (key === "getProfile" || key === 'getTweetDetail') {
+                queryClient.setQueryData([key], {
                     ...previousData,
-                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                    tweet: (previousData as ProfileType)?.tweet?.map((item: tweetsType) => {
                         if (item.id === tweetId) {
                             return { ...item, ReplyAmount: item.ReplyAmount + 1 };
                         } else {
@@ -69,6 +76,15 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
                         }
                     })
                 } as ProfileType)
+            } else if (key === "getTweetDetail") {
+                const previousData = queryClient.getQueryData<TweetDetailType>([key])
+                queryClient.setQueryData([key], {
+                    ...previousData,
+                    tweet: {
+                        ...previousData?.tweet,
+                        ReplyAmount: previousData?.tweet.Reposted ? previousData.tweet.ReplyAmount - 1 : previousData?.tweet.ReplyAmount! + 1,
+                    } as tweetsType,
+                })
             } else {
                 queryClient.setQueryData([key], ((previousData as tweetsType[])?.map((item) => {
                     if (item.id === tweetId) {

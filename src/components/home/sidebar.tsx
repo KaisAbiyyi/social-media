@@ -14,34 +14,37 @@ export default function MainSidebar() {
     const router = usePathname()
     return <>
         <div className="flex flex-col gap-8 sticky top-4 left-0">
-            <Card>
-                <CardHeader className="p-0">
-                    <Link href="/home" className={buttonVariants({ variant: 'ghost', className: '!text-lg !justify-start rounded-b-none font-semibold' })}>socal-media</Link>
+            <Card className="w-fit lg:w-full">
+                <CardHeader className="p-0 w-fit lg:w-full">
+                    <Link href="/home" className={buttonVariants({ variant: 'ghost', className: '!text-lg !justify-start rounded-b-none font-semibold' })}>
+                        <span className="hidden lg:block">social-media</span>
+                        <span className="lg:hidden block">sm</span>
+                    </Link>
                 </CardHeader>
-                <CardContent className="flex flex-col gap-0 px-0 py-0">
+                <CardContent className="flex flex-col w-full lg:w-full gap-0 px-0 py-0">
                     <Link href="/home" className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <Home />
-                        <span className="text-lg font-semibold">Home</span>
+                        <span className="text-lg font-semibold hidden lg:block">Home</span>
                     </Link>
                     <Link href="/explore" className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <Search />
-                        <span className="text-lg font-semibold">Explore</span>
+                        <span className="text-lg font-semibold hidden lg:block">Explore</span>
                     </Link>
                     <Link href="/notifications" className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <Bell />
-                        <span className="text-lg font-semibold">Notifications</span>
+                        <span className="text-lg font-semibold hidden lg:block">Notifications</span>
                     </Link>
                     <Link href="/messages" className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <Mail />
-                        <span className="text-lg font-semibold">Messages</span>
+                        <span className="text-lg font-semibold hidden lg:block">Messages</span>
                     </Link>
                     <Link href="/bookmarks" className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <Bookmark />
-                        <span className="text-lg font-semibold">Bookmarks</span>
+                        <span className="text-lg font-semibold hidden lg:block">Bookmarks</span>
                     </Link>
                     <Link href={`/profile/${session?.user.username}`} className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <User />
-                        <span className="text-lg font-semibold">Profile</span>
+                        <span className="text-lg font-semibold hidden lg:block">Profile</span>
                     </Link>
                     <MoreButton />
                     <PostButton />

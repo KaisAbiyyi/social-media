@@ -28,7 +28,7 @@ const DisplayDialog = () => {
                         <DialogHeader>
                             <DialogDescription>Light Mode</DialogDescription>
                             <Card className='overflow-hidden'>
-                                <CardContent className="flex justify-between flex-wrap px-0 py-0 !p-2 bg-slate-100 text-slate-900">
+                                <CardContent className="grid grid-cols-3 !p-2 bg-slate-100 text-slate-900">
                                     <div className="flex items-center flex-grow gap-4 p-4 lightRed">
                                         <RadioGroupItem value="lightRed" id="option-lightRed" onClick={() => setTheme('lightRed')} />
                                         <Label htmlFor="option-lightRed">Red</Label>
@@ -59,7 +59,7 @@ const DisplayDialog = () => {
                         <DialogHeader>
                             <DialogDescription>Dark Mode</DialogDescription>
                             <Card className='overflow-hidden'>
-                                <CardContent className="flex justify-between px-0 py-0 !p-2 bg-slate-900 text-slate-100">
+                                <CardContent className="grid grid-cols-3 !p-2 bg-slate-900 text-slate-100">
                                     <div className="flex items-center flex-grow gap-4 p-4 darkRed">
                                         <RadioGroupItem value="darkRed" id="option-darkRed" onClick={() => { setTheme('darkRed') }} />
                                         <Label htmlFor="option-darkRed">Red</Label>

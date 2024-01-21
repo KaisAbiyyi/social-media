@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import SpinnerLoader from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/use-toast";
+import { QuoteButtonPayload } from "@/lib/validators/ActionButtonValidator";
 import { ToastAction } from "@radix-ui/react-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -43,7 +44,16 @@ const QuoteButton: FC<QuoteButtonProps> = ({ userTweetId, tweetId, userImage, us
     }, [queryKey])
 
     const { mutate: QuoteTweet, isPending } = useMutation({
-        mutationFn: async ({ text, userId, userTweetId, tweetId }: TweetType) => await axios.post("/api/tweet", { text, userId, userTweetId, tweetId }),
+        mutationFn: async ({ text, userId, userTweetId, tweetId }: TweetType) => {
+            const payload: QuoteButtonPayload = {
+                text,
+                userId,
+                userTweetId: userTweetId as string,
+                tweetId: tweetId as string
+            }
+
+            await axios.post("/api/tweet", payload)
+        },
         onSettled: (data) => {
             setText("")
             queryClient.invalidateQueries({ queryKey: [key] })

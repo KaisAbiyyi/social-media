@@ -10,18 +10,18 @@ export default function ProfileButton() {
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className={buttonVariants({ variant: "default", className: "w-full justify-between" })}>
+            <DropdownMenuTrigger className={buttonVariants({ variant: "default", className: "lg:w-full w-fit !p-2 justify-between" })}>
                 <div className="flex gap-4 items-center">
                     <Avatar>
                         <AvatarImage src={data?.user.image ?? ''} />
                         <AvatarFallback>{data?.user.name?.at(0)?.toUpperCase()}</AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col text-start">
+                    <div className="lg:flex-col text-start hidden lg:flex">
                         <h1 className="text-lg font-semibold">{data?.user?.name}</h1>
                         <span className="text-sm opacity-80">{data?.user.username}</span>
                     </div>
                 </div>
-                <MoreHorizontal />
+                <MoreHorizontal className="hidden lg:block" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-full" align="start">
                 <DropdownMenuItem>Add an existing account</DropdownMenuItem>

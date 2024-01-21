@@ -6,7 +6,6 @@ import TweetsList from "@/components/home/main/TweetsList";
 import FollowButton from "@/components/home/main/components/FollowButton";
 import EditProfileDialog from "@/components/home/profile/EditProfileDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToastAction } from "@/components/ui/toast";
@@ -16,7 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Calendar } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 
 interface ProfilePageProps {
     params: {
@@ -61,7 +60,7 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                 </Card>
                 :
                 <>
-                    <Card className="flex items-start">
+                    <Card className="flex items-start flex-col relative md:flex-row">
                         <CardHeader>
                             <Avatar className="w-20 h-20">
                                 <AvatarImage src={ProfileData?.image} />
@@ -86,7 +85,7 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter className="p-4">
+                        <CardFooter className="p-4 absolute top-0 right-0">
                             {User?.user.username === ProfileData?.username ?
                                 <EditProfileDialog
                                     username={ProfileData?.username as string}
@@ -97,7 +96,7 @@ const ProfilePage: FC<ProfilePageProps> = ({ params }) => {
                             }
                         </CardFooter>
                     </Card>
-                    <TweetsList data={ProfileData?.Tweet as tweetsType[]} queryKey="getProfile" />
+                    <TweetsList data={ProfileData?.tweet as tweetsType[]} queryKey="getProfile" />
                 </>
             }
 

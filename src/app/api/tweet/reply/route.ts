@@ -1,10 +1,20 @@
+import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { ReplyButtonValidator } from "@/lib/validators/ActionButtonValidator";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
     try {
+        const session = await getAuthSession()
+        if (!session?.user) {
+            return NextResponse.json({
+                success: false,
+                message: "Unauthorized"
+            }, { status: 401 })
+        }
+
         const body = await request.json()
-        const { text, userId, tweetId } = body
+        const { text, userId, tweetId } = ReplyButtonValidator.parse(body)
         const requiredFields = ["text", "userId"];
         const errResponse = requiredFields
             .filter(field => !body[field])

@@ -1,6 +1,8 @@
 import { ProfileType } from "@/app/api/profile/[username]/route";
+import { TweetDetailType } from "@/app/api/tweet/[tweetId]/route";
 import { tweetsType } from "@/app/api/tweet/route";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { ActionButtonPayload } from "@/lib/validators/ActionButtonValidator";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { RefreshCcw } from "lucide-react";
@@ -26,14 +28,19 @@ const RepostButton: FC<RepostButtonProps> = ({ userId, tweetId, Reposted, queryK
     }, [queryKey])
 
     const { mutate: repostHandler, isPending: loadingRepost } = useMutation({
-        mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => await axios.post(`/api/tweet/repost`, { tweetId, userId }),
+        mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
+            const payload: ActionButtonPayload = {
+                tweetId, userId
+            }
+            await axios.post(`/api/tweet/repost`, payload)
+        },
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
             await queryClient.cancelQueries({ queryKey: [key] })
             const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
             if (key === "getProfile") {
-                queryClient.setQueryData(["getProfile"], {
+                queryClient.setQueryData([key], {
                     ...previousData,
-                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                    tweet: (previousData as ProfileType)?.tweet?.map((item: tweetsType) => {
                         if (item.id === tweetId) {
                             if (item.Reposted) {
                                 return { ...item, RepostAmount: item.RepostAmount - 1, Reposted: false };
@@ -44,6 +51,16 @@ const RepostButton: FC<RepostButtonProps> = ({ userId, tweetId, Reposted, queryK
                         }
                     })
                 } as ProfileType)
+            } else if (key === "getTweetDetail") {
+                const previousData = queryClient.getQueryData<TweetDetailType>([key])
+                queryClient.setQueryData([key], {
+                    ...previousData,
+                    tweet: {
+                        ...previousData?.tweet,
+                        RepostAmount: previousData?.tweet.Reposted ? previousData.tweet.RepostAmount - 1 : previousData?.tweet.RepostAmount! + 1,
+                        Reposted: previousData?.tweet.Reposted ? false : true
+                    } as tweetsType,
+                })
             } else {
                 queryClient.setQueryData([key], ((previousData as tweetsType[])?.map((item) => {
                     if (item.id === tweetId) {

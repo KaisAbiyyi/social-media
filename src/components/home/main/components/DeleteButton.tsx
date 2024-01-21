@@ -28,11 +28,11 @@ const DeleteButton: FC<DeleteButtonProps> = ({ id, queryKey }) => {
         mutationFn: async ({ id }: { id: string }) => await axios.delete(`/api/tweet/${id}`),
         onMutate: async () => {
             await queryClient.cancelQueries({ queryKey: [key] })
-            if (key === "getProfile") {
+            if (key === "getProfile" || key ==="getTweetProfile") {
                 const previousData = queryClient.getQueryData<ProfileType>([key])
-                queryClient.setQueryData(["getProfile"], {
+                queryClient.setQueryData([key], {
                     ...previousData,
-                    Tweet: (previousData as ProfileType)?.Tweet?.filter((item: tweetsType) => item.id !== id)
+                    tweet: (previousData as ProfileType)?.tweet?.filter((item: tweetsType) => item.id !== id)
                 } as ProfileType)
                 return { previousData }
             } else {

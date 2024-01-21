@@ -9,13 +9,13 @@ export default function MainLayout({
 }) {
     return (
         <div className="container relative flex gap-4 p-4 mx-auto">
-            <div className="w-1/4 relative">
+            <div className="lg:w-1/4 w-fit relative">
                 <MainSidebar />
             </div>
-            <div className="w-2/4">
+            <div className="flex-grow">
                 {children}
             </div>
-            <div className="w-1/4 relative">
+            <div className="w-1/4 relative hidden lg:block">
                 <MainAside />
             </div>
         </div>

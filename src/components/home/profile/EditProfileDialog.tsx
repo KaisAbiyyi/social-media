@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { UploadButton } from "@/utils/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -31,8 +32,8 @@ const formSchema = z.object({
     newName: z.string().min(1, {
         message: "Name cannot null.",
     }),
-    newBio: z.string()
-
+    newBio: z.string(),
+    newImg: z.string()
 })
 
 
@@ -41,14 +42,16 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
     const [open, setOpen] = useState<boolean>(false)
     const queryClient = useQueryClient()
     const router = useRouter()
-    const [users, setUsers] = useState<object>({ newName: name, newBio: bio ?? "" })
+    const [imgUrl, setImgUrl] = useState<string>(image as string)
+    const [users, setUsers] = useState<z.infer<typeof formSchema>>({ newName: name, newBio: bio ?? "", newImg: imgUrl })
+    const [uploadLoading, setUploadLoading] = useState<boolean>(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: users,
     })
 
     const { mutate: handleSubmit, isPending } = useMutation({
-        mutationFn: async ({ newName, newBio }: z.infer<typeof formSchema>) => await axios.post(`/api/profile/${username}`, { newName, newBio }),
+        mutationFn: async ({ newName, newBio, newImg }: z.infer<typeof formSchema>) => await axios.post(`/api/profile/${username}`, { newName, newBio, newImg }),
         onMutate: async ({ newName, newBio }: z.infer<typeof formSchema>) => {
             await queryClient.cancelQueries({ queryKey: ["getProfile"] })
             const previousData = queryClient.getQueryData<ProfileType>(["getProfile"])
@@ -79,15 +82,30 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
             <DialogTrigger className={buttonVariants({ variant: "outline" })}>Edit Profile </DialogTrigger>
             <DialogContent className="p-0 pt-12">
                 <Card className="flex">
-                    <CardHeader>
+                    <CardHeader className="flex flex-col gap-2 items-center">
                         <Avatar className="w-20 h-20">
-                            <AvatarImage src={image} />
+                            <AvatarImage src={imgUrl} />
                             <AvatarFallback>{name.at(0)?.toUpperCase()}</AvatarFallback>
                         </Avatar>
+                        <UploadButton appearance={{
+                            button: buttonVariants({ size: "sm" })
+                        }}
+                            endpoint="imageUploader"
+                            onClientUploadComplete={(res) => {
+                                setImgUrl(res[0].url)
+                                setUploadLoading(false)
+                            }}
+                            onUploadProgress={() => setUploadLoading(true)}
+                            onUploadError={(error: Error) => {
+                                toast({
+                                    title: "Something went wrong",
+                                    description: error.message
+                                })
+                            }} />
                     </CardHeader>
                     <CardContent className="flex flex-col flex-grow p-4">
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(async (values: z.infer<typeof formSchema>) => handleSubmit({ newName: values.newName, newBio: values.newBio }))} className="space-y-8">
+                            <form onSubmit={form.handleSubmit(async (values: z.infer<typeof formSchema>) => handleSubmit({ newName: values.newName, newBio: values.newBio, newImg: imgUrl }))} className="space-y-8">
                                 <FormField
                                     control={form.control}
                                     name="newName"
@@ -115,7 +133,7 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
                                     )}
                                 />
                                 <div className="flex justify-end">
-                                    <Button type="submit" className="px-6 flex gap-2" >Save</Button>
+                                    <Button type="submit" disabled={uploadLoading} className="px-6 flex gap-2" >Save</Button>
                                 </div>
                             </form>
                         </Form>

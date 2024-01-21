@@ -1,8 +1,10 @@
 import { ProfileType } from "@/app/api/profile/[username]/route";
+import { TweetDetailType } from "@/app/api/tweet/[tweetId]/route";
 import { tweetsType } from "@/app/api/tweet/route";
 import { Button } from "@/components/ui/button";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
+import { ActionButtonPayload } from "@/lib/validators/ActionButtonValidator";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Heart } from "lucide-react";
@@ -34,14 +36,20 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, q
     }, [queryKey])
 
     const { mutate: likeHandler, isPending: loadingLike } = useMutation({
-        mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => await axios.post(`/api/tweet/like`, { tweetId, userId }),
+        mutationFn: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
+            const payload: ActionButtonPayload = {
+                tweetId,
+                userId
+            }
+            await axios.post(`/api/tweet/like`, payload)
+        },
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
             await queryClient.cancelQueries({ queryKey: [key] })
             if (key === "getProfile") {
                 const previousData = queryClient.getQueryData<ProfileType>([key])
-                queryClient.setQueryData(["getProfile"], {
+                queryClient.setQueryData([key], {
                     ...previousData,
-                    Tweet: (previousData as ProfileType)?.Tweet?.map((item: tweetsType) => {
+                    tweet: (previousData as ProfileType)?.tweet?.map((item: tweetsType) => {
                         if (item.id === tweetId) {
                             if (item.Liked) {
                                 return { ...item, LikeAmount: item.LikeAmount - 1, Liked: false };
@@ -53,7 +61,18 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, q
                     })
                 } as ProfileType)
                 return { previousData }
-            } else {
+            } else if (key === "getTweetDetail") {
+                const previousData = queryClient.getQueryData<TweetDetailType>([key])
+                queryClient.setQueryData([key], {
+                    ...previousData,
+                    tweet: {
+                        ...previousData?.tweet,
+                        LikeAmount: previousData?.tweet.Liked ? previousData.tweet.LikeAmount - 1 : previousData?.tweet.LikeAmount! + 1,
+                        Liked: previousData?.tweet.Liked ? false : true
+                    } as tweetsType,
+                })
+            }
+            else {
                 const previousData = queryClient.getQueryData<tweetsType[]>([key])
                 queryClient.setQueryData([key], ((previousData as tweetsType[])?.map((item) => {
                     if (item.id === tweetId) {
@@ -71,6 +90,7 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, q
 
         },
         onError: (error, __, context) => {
+            console.log(error)
             queryClient.setQueryData([key], () => context?.previousData);
             toast({
                 title: "Something went wrong",

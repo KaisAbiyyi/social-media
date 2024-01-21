@@ -14,7 +14,7 @@ const MoreButton: FC = () => {
         <DropdownMenu>
             <DropdownMenuTrigger className={buttonVariants({ variant: "ghost", size: "lg", class: "!justify-start !rounded-none py-6 gap-4" })}>
                 <MoreHorizontal />
-                <span className="text-lg font-semibold">More</span>
+                <span className="text-lg font-semibold hidden lg:block">More</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80" align="start">
                 <DropdownMenuLabel>Options</DropdownMenuLabel>

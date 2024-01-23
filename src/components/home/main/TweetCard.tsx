@@ -2,13 +2,15 @@
 
 import { tweetsType } from "@/app/api/tweet/route";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import SpinnerLoader from "@/components/ui/spinner";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
+import { UploadButton } from "@/utils/uploadthing";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { Image } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { FC, FormEvent, useState } from "react";
@@ -26,6 +28,7 @@ type TweetType = {
 const TweetCard: FC<TweetCardProps> = () => {
     const [text, setText] = useState<string>("")
     const queryClient = useQueryClient()
+    const [images, setImages] = useState<[]>([])
     const { data: User, status } = useSession()
     const { toast } = useToast()
     const { mutate: CreateNewPost, isPending } = useMutation({
@@ -47,7 +50,10 @@ const TweetCard: FC<TweetCardProps> = () => {
                     id: User?.user.id!,
                     image: User?.user.image!,
                     name: User?.user.name!,
-                    username: User?.user.username!
+                    username: User?.user.username!,
+                    followed: false,
+                    followers: 0,
+                    following: 0
                 },
             }
             queryClient.setQueryData(["getTweets"], (old: tweetsType[]) => [optimisTicData, ...old])
@@ -79,7 +85,7 @@ const TweetCard: FC<TweetCardProps> = () => {
                         <AvatarFallback>{User?.user.name?.at(0)?.toUpperCase()}</AvatarFallback>
                     </Avatar>
                 </CardHeader>
-                <CardContent className="flex-grow p-4">
+                <CardContent className="flex-grow flex flex-col gap-4 p-4">
                     <ReactTextareaAutosize
                         placeholder="What is happening?!"
                         value={text}
@@ -87,18 +93,40 @@ const TweetCard: FC<TweetCardProps> = () => {
                         className="flex min-h-[80px] w-full rounded-none bg-transparent border-x-0 border-t-0 border-b-1 px-0 py-0 text-lg focus:border-b-primary border-b-accent focus:outline-none focus:ring-0 ring-offset-background placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
                         rows={3}
                         maxRows={8} />
+                    <CardFooter className="justify-between p-0 w-full">
+                        <UploadButton
+                            appearance={{
+                                allowedContent: "hidden",
+                                container: "!p-0",
+                                button: buttonVariants({ variant: "default", size: "icon", className: "rounded-full" })
+                            }}
+                            content={{
+                                button({ ready }) {
+                                    if (ready) return <Image />
+                                    return <SpinnerLoader />
+                                },
+                            }}
+                            endpoint="imageUploader"
+                            onClientUploadComplete={(res) => {
+                                console.log(res)
+                            }}
+                            onUploadError={(err: Error) => {
+                                return toast({
+                                    title: "Something went wrong",
+                                    description: err.message
+                                })
+                            }} />
+                        <Button
+                            disabled={text.length < 1 || isPending}
+                            onClick={() => CreateNewPost({ text, userId: User?.user.id as string })}>
+                            {isPending ? <SpinnerLoader />
+                                :
+                                "Post"
+                            }
+                        </Button>
+                    </CardFooter>
                 </CardContent>
             </div>
-            <CardFooter className="justify-end p-4">
-                <Button
-                    disabled={text.length < 1 || isPending}
-                    onClick={() => CreateNewPost({ text, userId: User?.user.id as string })}>
-                    {isPending ? <SpinnerLoader />
-                        :
-                        "Post"
-                    }
-                </Button>
-            </CardFooter>
         </Card>);
 }
 

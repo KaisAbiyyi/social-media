@@ -1,5 +1,5 @@
 import { Button, buttonVariants } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
+import { Image, MessageCircle } from "lucide-react";
 import { FC, FormEvent, useEffect, useState } from "react";
 import {
     Dialog,
@@ -22,6 +22,7 @@ import { tweetsType } from "@/app/api/tweet/route";
 import { ProfileType } from "@/app/api/profile/[username]/route";
 import { TweetDetailType } from "@/app/api/tweet/[tweetId]/route";
 import { ReplyButtonPayload } from "@/lib/validators/ActionButtonValidator";
+import { UploadButton } from "@/utils/uploadthing";
 
 interface ReplyButtonProps {
     tweetId: string;
@@ -65,7 +66,7 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
         onMutate: async ({ tweetId }: { tweetId: string }) => {
             await queryClient.cancelQueries({ queryKey: [key] })
             const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
-            if (key === "getProfile" || key === 'getTweetDetail') {
+            if (key === "getProfile") {
                 queryClient.setQueryData([key], {
                     ...previousData,
                     tweet: (previousData as ProfileType)?.tweet?.map((item: tweetsType) => {
@@ -82,7 +83,7 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
                     ...previousData,
                     tweet: {
                         ...previousData?.tweet,
-                        ReplyAmount: previousData?.tweet.Reposted ? previousData.tweet.ReplyAmount - 1 : previousData?.tweet.ReplyAmount! + 1,
+                        ReplyAmount: previousData?.tweet.ReplyAmount! + 1,
                     } as tweetsType,
                 })
             } else {
@@ -154,7 +155,31 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
                                 maxRows={8} />
                         </div>
                     </div>
-                    <CardFooter className="justify-end p-4">
+                    <CardFooter className="justify-between p-4 mt-4">
+                        <div className="flex-grow flex">
+                            <UploadButton
+                                appearance={{
+                                    allowedContent: "hidden",
+                                    container: "!p-0",
+                                    button: buttonVariants({ variant: "default", size: "icon", className: "rounded-full" })
+                                }}
+                                content={{
+                                    button({ ready }) {
+                                        if (ready) return <Image />
+                                        return <SpinnerLoader />
+                                    },
+                                }}
+                                endpoint="imageUploader"
+                                onClientUploadComplete={(res) => {
+                                    console.log(res)
+                                }}
+                                onUploadError={(err: Error) => {
+                                    return toast({
+                                        title: "Something went wrong",
+                                        description: err.message
+                                    })
+                                }} />
+                        </div>
                         <Button
                             onClick={() => { submitReply({ userId: data?.user.id as string, tweetId, text }); }}
                             disabled={text.length < 1 || replyPending}>

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import SpinnerLoader from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { UploadButton } from "@/utils/uploadthing";
@@ -83,13 +84,22 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
             <DialogContent className="p-0 pt-12">
                 <Card className="flex">
                     <CardHeader className="flex flex-col gap-2 items-center">
-                        <Avatar className="w-20 h-20">
-                            <AvatarImage src={imgUrl} />
-                            <AvatarFallback>{name.at(0)?.toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <UploadButton appearance={{
-                            button: buttonVariants({ size: "sm" })
-                        }}
+
+                        <UploadButton
+                        appearance={{ 
+                            button:"h-full w-full bg-transparent rounded-full"
+                         }}
+                            content={{
+                                button({ ready }) {
+                                    if (ready) return (
+                                        <Avatar className="w-20 h-20">
+                                            <AvatarImage src={imgUrl} />
+                                            <AvatarFallback>{name.at(0)?.toUpperCase()}</AvatarFallback>
+                                        </Avatar>
+                                    )
+                                    return <SpinnerLoader />
+                                }
+                            }}
                             endpoint="imageUploader"
                             onClientUploadComplete={(res) => {
                                 setImgUrl(res[0].url)

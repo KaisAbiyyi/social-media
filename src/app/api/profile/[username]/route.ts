@@ -29,6 +29,9 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
             followers: true,
             following: true,
             Tweet: {
+                where: {
+                    repliedId: null
+                },
                 include: {
                     quote: {
                         include: {

@@ -143,6 +143,9 @@ export async function GET(request: Request, { params }: { params: { tweetId: str
                             }
                         }
                     },
+                    orderBy: {
+                        createdAt: "desc"
+                    }
                 },
                 quote: {
                     include: {

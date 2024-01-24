@@ -149,9 +149,11 @@ const TweetPage: FC<TweetPageProps> = ({ params }) => {
                 </>
             }
             {isPending ?
-                <SpinnerLoader />
+                <div className="flex justify-center">
+                    <SpinnerLoader />
+                </div>
                 :
-                <TweetsList queryKey="getTweetDetail" data={data.replies} />
+                <TweetsList queryKey="getTweetDetailReplies" data={data.replies} />
             }
         </div>
     );

@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import ReactTextareaAutosize from "react-textarea-autosize";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import SpinnerLoader from "@/components/ui/spinner";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -65,8 +65,8 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
         },
         onMutate: async ({ tweetId }: { tweetId: string }) => {
             await queryClient.cancelQueries({ queryKey: [key] })
-            const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
             if (key === "getProfile") {
+                const previousData = queryClient.getQueryData<ProfileType>([key])
                 queryClient.setQueryData([key], {
                     ...previousData,
                     tweet: (previousData as ProfileType)?.tweet?.map((item: tweetsType) => {
@@ -77,16 +77,53 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
                         }
                     })
                 } as ProfileType)
+                return { previousData }
             } else if (key === "getTweetDetail") {
                 const previousData = queryClient.getQueryData<TweetDetailType>([key])
+                const updatedReplies = [
+                    {
+                        userId: data?.user.id,
+                        Bookmarked: false,
+                        LikeAmount: 0,
+                        Liked: false,
+                        ReplyAmount: 0,
+                        RepostAmount: 0,
+                        Reposted: false,
+                        text,
+                        User: {
+                            id: data?.user.id,
+                            email: data?.user.email,
+                            image: data?.user.image,
+                            username: data?.user.username,
+                            name: data?.user.name,
+                        },
+                    },
+                    ...(previousData?.replies || []),
+                ];
                 queryClient.setQueryData([key], {
-                    ...previousData,
                     tweet: {
                         ...previousData?.tweet,
                         ReplyAmount: previousData?.tweet.ReplyAmount! + 1,
                     } as tweetsType,
-                })
+                    replies: updatedReplies
+                } as TweetDetailType)
+                return { previousData }
+            } else if (key === "getTweetDetailReplies") {
+                const previousData = queryClient.getQueryData<TweetDetailType>(["getTweetDetail"])
+                queryClient.setQueryData(["getTweetDetail"], {
+                    ...previousData,
+                    replies: previousData?.replies.map((item: tweetsType) => {
+                        if (item.id === tweetId) {
+                            return ({ ...item, ReplyAmount: item.ReplyAmount + 1 })
+                        }
+                        else {
+                            return ({ ...item })
+                        }
+                    })
+                } as TweetDetailType)
+                return { previousData }
             } else {
+                const previousData = queryClient.getQueryData<tweetsType[]>([key])
                 queryClient.setQueryData([key], ((previousData as tweetsType[])?.map((item) => {
                     if (item.id === tweetId) {
                         return ({ ...item, ReplyAmount: item.ReplyAmount + 1 })
@@ -95,17 +132,37 @@ const ReplyButton: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage,
                         return ({ ...item })
                     }
                 })))
+                return { previousData }
             }
 
-            return { previousData }
         },
-        onError: (_, __, context) => {
+        onError: (error, __, context) => {
             queryClient.setQueryData([key], () => context?.previousData);
+            console.log(error)
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 422) {
+                    return toast({
+                        title: "Something went wrong",
+                        description: "Reply must be at least 3 characters long",
+                        variant: "destructive"
+                    })
+                } else {
+                    return toast({
+                        title: "Something went wrong",
+                        description: "Error while uploading your reply, try again later",
+                        variant: "destructive"
+                    })
+                }
+            }
         },
         onSettled: () => {
             setOpen(false)
             setText("")
-            queryClient.invalidateQueries({ queryKey: [key] })
+            if (key === "getTweetDetailReplies") {
+                queryClient.invalidateQueries({ queryKey: ["getTweetDetail"] })
+            } else {
+                queryClient.invalidateQueries({ queryKey: [key] })
+            }
         }
     })
 

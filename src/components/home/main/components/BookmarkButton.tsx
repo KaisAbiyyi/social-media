@@ -37,8 +37,8 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
         },
         onMutate: async ({ tweetId, userId }: { tweetId: string, userId: string }) => {
             await queryClient.cancelQueries({ queryKey: [queryKey] })
-            const previousData = key === "getProfile" ? queryClient.getQueryData<ProfileType>([key]) : queryClient.getQueryData<tweetsType[]>([key])
             if (key === "getProfile") {
+                const previousData = queryClient.getQueryData<ProfileType>([key])
                 queryClient.setQueryData([key], {
                     ...previousData,
                     tweet: (previousData as ProfileType)?.tweet?.map((item: tweetsType) => {
@@ -52,6 +52,7 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
                         }
                     })
                 } as ProfileType)
+                return { previousData }
             } else if (key === "getTweetDetail") {
                 const previousData = queryClient.getQueryData<TweetDetailType>([key])
                 queryClient.setQueryData([key], {
@@ -61,10 +62,30 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
                         Bookmarked: previousData?.tweet.Bookmarked ? false : true
                     } as tweetsType,
                 })
-            }
-            else if (key === 'getBookmarks') {
+                return { previousData }
+            } else if (key === "getTweetDetailReplies") {
+                const previousData = queryClient.getQueryData<TweetDetailType>(["getTweetDetail"])
+                queryClient.setQueryData(["getTweetDetail"], {
+                    ...previousData,
+                    replies: previousData?.replies.map((item: tweetsType) => {
+                        if (item.id === tweetId) {
+                            if (item.Bookmarked) {
+                                return ({ ...item, Bookmarked: false })
+                            }
+                            return ({ ...item, Bookmarked: true })
+                        }
+                        else {
+                            return ({ ...item })
+                        }
+                    })
+                } as TweetDetailType)
+                return { previousData }
+            } else if (key === 'getBookmarks') {
+                const previousData = queryClient.getQueryData<tweetsType[]>([key])
                 queryClient.setQueryData([key], (previousData as tweetsType[])?.filter((item: tweetsType) => item.id !== tweetId))
+                return { previousData }
             } else {
+                const previousData = queryClient.getQueryData<tweetsType[]>([key])
                 queryClient.setQueryData([key], ((previousData as tweetsType[]).map((item: tweetsType) => {
                     if (item.id === tweetId) {
                         if (item.Bookmarked) {
@@ -76,15 +97,19 @@ const BookmarkButton: FC<BookmarkButtonProps> = ({ userId, tweetId, Bookmarked, 
                         return ({ ...item })
                     }
                 })))
+                return { previousData }
             }
 
-            return { previousData }
         },
         onError: (_, __, context) => {
             queryClient.setQueryData([key], () => context?.previousData);
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: [key] })
+            if (key === "getTweetDetailReplies") {
+                queryClient.invalidateQueries({ queryKey: ["getTweetDetail"] })
+            } else {
+                queryClient.invalidateQueries({ queryKey: [key] })
+            }
         }
     })
 

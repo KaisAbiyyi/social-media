@@ -13,7 +13,7 @@ export const QuoteButtonValidator = z.object({
 })
 
 export const ReplyButtonValidator = z.object({
-    text: z.string().min(3).max(300),
+    text: z.string().max(300),
     tweetId: z.string().min(3),
     userId: z.string().min(3),
 })

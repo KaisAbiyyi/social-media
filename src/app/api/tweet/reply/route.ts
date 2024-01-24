@@ -2,6 +2,7 @@ import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ReplyButtonValidator } from "@/lib/validators/ActionButtonValidator";
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 
 export async function POST(request: Request) {
     try {
@@ -51,6 +52,13 @@ export async function POST(request: Request) {
             data
         }, { status: 201 })
     } catch (error) {
+        if (error instanceof ZodError) {
+            return NextResponse.json({
+                success: false,
+                message: error.message
+            }, { status: 422 })
+        }
+
         return NextResponse.json({
             success: false,
             message: "Invalid JSON"

@@ -13,6 +13,7 @@ export type tweetsType = {
     updatedAt?: Date;
     LikeAmount: number;
     Liked: boolean;
+    repliedId?: string;
     Bookmarked: boolean;
     RepostAmount: number;
     Reposted: boolean;

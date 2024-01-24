@@ -61,6 +61,23 @@ const RepostButton: FC<RepostButtonProps> = ({ userId, tweetId, Reposted, queryK
                         Reposted: previousData?.tweet.Reposted ? false : true
                     } as tweetsType,
                 })
+            } else if (key === "getTweetDetailReplies") {
+                const previousData = queryClient.getQueryData<TweetDetailType>(["getTweetDetail"])
+                queryClient.setQueryData(["getTweetDetail"], {
+                    ...previousData,
+                    replies: previousData?.replies.map((item: tweetsType) => {
+                        if (item.id === tweetId) {
+                            if (item.Reposted) {
+                                return ({ ...item, RepostAmount: item.RepostAmount - 1, Reposted: false })
+                            }
+                            return ({ ...item, RepostAmount: item.RepostAmount + 1, Reposted: true })
+                        }
+                        else {
+                            return ({ ...item })
+                        }
+                    })
+                } as TweetDetailType)
+                return { previousData }
             } else {
                 queryClient.setQueryData([key], ((previousData as tweetsType[])?.map((item) => {
                     if (item.id === tweetId) {
@@ -81,7 +98,11 @@ const RepostButton: FC<RepostButtonProps> = ({ userId, tweetId, Reposted, queryK
             queryClient.setQueryData(["getTweets"], () => context?.previousData);
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["getTweets"] })
+            if (key === "getTweetDetailReplies") {
+                queryClient.invalidateQueries({ queryKey: ["getTweetDetail"] })
+            } else {
+                queryClient.invalidateQueries({ queryKey: [key] })
+            }
         }
     })
 

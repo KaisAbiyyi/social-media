@@ -70,13 +70,34 @@ const ReplyField: FC<ReplyButtonProps> = ({ tweetId, tweetText, tweetUserImage, 
                 } as ProfileType)
             } else if (key === "getTweetDetail") {
                 const previousData = queryClient.getQueryData<TweetDetailType>([key])
+                const updatedReplies = [
+                    {
+                        userId: data?.user.id,
+                        Bookmarked: false,
+                        LikeAmount: 0,
+                        Liked: false,
+                        ReplyAmount: 0,
+                        RepostAmount: 0,
+                        Reposted: false,
+                        text,
+                        User: {
+                            id: data?.user.id,
+                            email: data?.user.email,
+                            image: data?.user.image,
+                            username: data?.user.username,
+                            name: data?.user.name,
+                        },
+                    },
+                    ...(previousData?.replies || []),
+                ];
                 queryClient.setQueryData([key], {
                     ...previousData,
                     tweet: {
                         ...previousData?.tweet,
                         ReplyAmount: previousData?.tweet.ReplyAmount! + 1,
                     } as tweetsType,
-                })
+                    replies: updatedReplies
+                } as TweetDetailType)
             } else {
                 queryClient.setQueryData([key], ((previousData as tweetsType[])?.map((item) => {
                     if (item.id === tweetId) {

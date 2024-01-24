@@ -71,6 +71,23 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, q
                         Liked: previousData?.tweet.Liked ? false : true
                     } as tweetsType,
                 })
+            } else if (key === "getTweetDetailReplies") {
+                const previousData = queryClient.getQueryData<TweetDetailType>(["getTweetDetail"])
+                queryClient.setQueryData(["getTweetDetail"], {
+                    ...previousData,
+                    replies: previousData?.replies.map((item: tweetsType) => {
+                        if (item.id === tweetId) {
+                            if (item.Liked) {
+                                return ({ ...item, LikeAmount: item.LikeAmount - 1, Liked: false })
+                            }
+                            return ({ ...item, LikeAmount: item.LikeAmount + 1, Liked: true })
+                        }
+                        else {
+                            return ({ ...item })
+                        }
+                    })
+                } as TweetDetailType)
+                return { previousData }
             }
             else {
                 const previousData = queryClient.getQueryData<tweetsType[]>([key])
@@ -100,7 +117,11 @@ const LikeButton: FC<LikeButtonProps> = ({ userId, tweetId, LikeAmount, Liked, q
             })
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: [key] })
+            if (key === "getTweetDetailReplies") {
+                queryClient.invalidateQueries({ queryKey: ["getTweetDetail"] })
+            } else {
+                queryClient.invalidateQueries({ queryKey: [key] })
+            }
         }
     })
 

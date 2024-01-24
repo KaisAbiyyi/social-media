@@ -5,47 +5,10 @@ import { Bookmark, Like, Prisma, Repost } from "@prisma/client"
 import { getToken } from "next-auth/jwt"
 import { getAuthSession } from "@/lib/auth"
 
-export type ReplyType = {
-    Reposting?: boolean;
-    id?: string;
-    userId: string;
-    text: string;
-    repliedId?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-    LikeAmount: number;
-    Liked: boolean;
-    Bookmarked: boolean;
-    RepostAmount: number;
-    Reposted: boolean;
-    ReplyAmount: number;
-    User: {
-        id: string;
-        name: string;
-        image: string;
-        username: string;
-        email: string;
-        followers: number;
-        following: number;
-        followed: boolean;
-    },
-    quote?: {
-        id: string;
-        text: string;
-        createdAt: Date;
-        updatedAt: Date;
-        User: {
-            name: string;
-            image: string;
-            username: string;
-        }
-    } | null,
-    replies?: ReplyType[];
-}
 
 export type TweetDetailType = {
     tweet: tweetsType,
-    replies: ReplyType[]
+    replies: tweetsType[]
 }
 
 type Tweet = Prisma.TweetGetPayload<{
@@ -70,6 +33,14 @@ type Tweet = Prisma.TweetGetPayload<{
 
 export async function DELETE(request: Request, { params }: { params: { tweetId: string } }) {
     try {
+        const session = await getAuthSession()
+        if (!session?.user) {
+            return NextResponse.json({
+                success: false,
+                message: "Unauthorized"
+            }, { status: 401 })
+        }
+
         const tweetId = params.tweetId
         const tweet = await prisma.tweet.findFirst({
             where: {
@@ -78,13 +49,19 @@ export async function DELETE(request: Request, { params }: { params: { tweetId: 
         })
         await prisma.tweet.deleteMany({
             where: {
-                quotedId: tweetId
+                quotedId: tweet?.id
+            }
+        })
+
+        await prisma.tweet.deleteMany({
+            where: {
+                repliedId: tweet?.id
             }
         })
 
         await prisma.tweet.delete({
             where: {
-                id: tweetId
+                id: tweet?.id
             }
         })
 
@@ -191,7 +168,7 @@ export async function GET(request: Request, { params }: { params: { tweetId: str
         }
 
         const repliesData = (data: any) => {
-            const temp: ReplyType[] = data.map((item: Tweet) => ({
+            return data.map((item: Tweet) => ({
                 id: item?.id,
                 text: item?.text!,
                 userId: item?.userId!,
@@ -225,13 +202,10 @@ export async function GET(request: Request, { params }: { params: { tweetId: str
                         image: item?.quote?.User.image as string
                     }
                 } : null,
-                replies: repliesData(item.replies) as ReplyType[]
             }))
-
-            return temp
         }
 
-        const replies: ReplyType[] = repliesData(Tweet?.replies as Tweet[])
+        const replies: tweetsType[] = repliesData(Tweet?.replies as Tweet[])
 
         return NextResponse.json({
             success: true,

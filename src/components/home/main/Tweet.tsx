@@ -39,7 +39,7 @@ const Tweet: FC<TweetProps> = ({ tweet, queryKey }) => {
                     </CardHeader>
                 </div>
             }
-            <Link href={`/profile/${tweet.User.username}/status/${tweet.id}`} className="absolute z-0 w-full h-full" />
+            <a href={`/profile/${tweet.User.username}/status/${tweet.id}`} className="absolute z-0 w-full h-full" />
             <div className="flex w-full">
                 <CardHeader className="p-4">
                     <ProfileCard
@@ -91,6 +91,15 @@ const Tweet: FC<TweetProps> = ({ tweet, queryKey }) => {
                     </CardHeader>
                     <CardContent className="p-4">
                         <p>{tweet.text}</p>
+                        {tweet.quotedTweetDeleted && (
+                            <Card className="flex justify-center mt-2 p-4 items-center bg-background/50">
+                                <CardTitle className="text-lg">Tweet Deleted</CardTitle>
+                            </Card>
+                        )}
+                        {tweet.image ?
+                            <img src={tweet.image.imageUrl} alt={tweet.image.imageName} className="w-full lg:w-[500px] mt-4 rounded-lg object-cover" />
+                            : null
+                        }
                         {tweet.quote != null &&
                             <Card className={buttonVariants({ variant: "ghost", className: "flex flex-col justify-start items-start rounded-lg px-0 py-0 mt-2 bg-transparent relative border-secondary" })}>
                                 <Link href={`/${tweet.quote.User.username}/status/${tweet.quote.id}`} className="w-full h-full absolute z-10" />

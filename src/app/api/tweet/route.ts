@@ -1,6 +1,7 @@
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Bookmark, Like, Prisma, Repost } from "@prisma/client";
+import { JsonValue } from "@prisma/client/runtime/library";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -18,6 +19,12 @@ export type tweetsType = {
     RepostAmount: number;
     Reposted: boolean;
     ReplyAmount: number;
+    quotedTweetDeleted?: boolean;
+    image?: {
+        imageKey: string;
+        imageUrl: string;
+        imageName: string
+    } | null;
     User: {
         id: string;
         name: string;
@@ -85,6 +92,7 @@ export async function GET(req: NextRequest) {
         },
         where: {
             repliedId: null,
+            repliedTweetDeleted: false,
         },
         orderBy: {
             createdAt: "desc"
@@ -104,6 +112,12 @@ export async function GET(req: NextRequest) {
             RepostAmount: item.Repost.length,
             Reposted: !!(item.Repost.find((item: Repost) => item.userId === session?.id)),
             ReplyAmount: item.replies.length,
+            quotedTweetDeleted: item.quotedTweetDeleted,
+            image: item.imageUrl ? {
+                imageKey: item.imageKey as string,
+                imageName: item.imageName as string,
+                imageUrl: item.imageUrl as string,
+            } : null,
             User: {
                 id: item.User.id,
                 image: item.User.image as string,
@@ -145,7 +159,7 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json()
-        const { text, userId, userTweetId, tweetId } = body
+        const { text, userId, userTweetId, tweetId, image } = body
         const requiredFields = ["text", "userId"];
         const errResponse = requiredFields
             .filter(field => !body[field])
@@ -198,7 +212,10 @@ export async function POST(request: Request) {
             const tweet = await prisma.tweet.create({
                 data: {
                     text,
-                    userId
+                    userId,
+                    imageKey: image.imageKey ?? null,
+                    imageName: image.imageName ?? null,
+                    imageUrl: image.imageUrl ?? null,
                 }
             })
 

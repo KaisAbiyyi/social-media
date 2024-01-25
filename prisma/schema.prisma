@@ -45,7 +45,7 @@ model User {
   email         String?    @unique
   emailVerified DateTime?
   image         String?
-  bio           String?     @db.Text
+  bio           String?    @db.Text
   createdAt     DateTime   @default(now())
   accounts      Account[]
   sessions      Session[]
@@ -87,14 +87,19 @@ model Tweet {
   Like      Like[]
   Bookmark  Bookmark[]
   Repost    Repost[]
+  imageUrl  String?
+  imageName String?
+  imageKey  String?
 
-  repliedId String?
-  reply     Tweet?  @relation("RepliedTweet", fields: [repliedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  replies   Tweet[] @relation("RepliedTweet")
+  repliedTweetDeleted Boolean @default(false)
+  repliedId           String?
+  reply               Tweet?  @relation("RepliedTweet", fields: [repliedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies             Tweet[] @relation("RepliedTweet")
 
-  quotedId String?
-  quote    Tweet?  @relation("QuotedTweet", fields: [quotedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  quotes   Tweet[] @relation("QuotedTweet")
+  quotedTweetDeleted Boolean @default(false)
+  quotedId           String?
+  quote              Tweet?  @relation("QuotedTweet", fields: [quotedId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quotes             Tweet[] @relation("QuotedTweet")
 
   @@index([quotedId])
   @@index([repliedId])

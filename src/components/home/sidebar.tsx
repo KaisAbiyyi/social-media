@@ -42,10 +42,10 @@ export default function MainSidebar() {
                         <Bookmark />
                         <span className="text-lg font-semibold hidden lg:block">Bookmarks</span>
                     </Link>
-                    <Link href={`/profile/${session?.user.username}`} className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
+                    <a href={`/profile/${session?.user.username}`} className={buttonVariants({ variant: 'ghost', size: "lg", className: '!justify-start gap-4 !rounded-none py-6' })}>
                         <User />
                         <span className="text-lg font-semibold hidden lg:block">Profile</span>
-                    </Link>
+                    </a>
                     <MoreButton />
                     <PostButton />
                 </CardContent>

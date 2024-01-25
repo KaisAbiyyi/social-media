@@ -53,24 +53,24 @@ const ProfileCard: FC<ProfileCardProps> = (
                     () => {
                         if (trigger === "name") {
                             return (
-                                <Link href={`/profile/${username}`}>
+                                <a href={`/profile/${username}`}>
                                     <CardTitle className={cn("text-base font-bold p-0 m-0 hover:underline cursor-pointer", className)}>{name}</CardTitle>
-                                </Link>
+                                </a>
                             )
                         } else if (trigger === "avatar") {
                             return (
-                                <Link href={`/profile/${username}`}>
+                                <a href={`/profile/${username}`}>
                                     <Avatar className={cn("hover:opacity-80 transition ease-in cursor-pointer", className)}>
                                         <AvatarImage src={image} />
                                         <AvatarFallback>{name?.at(0)?.toUpperCase()}</AvatarFallback>
                                     </Avatar>
-                                </Link>
+                                </a>
                             )
                         } else {
                             return (
-                                <Link href={`/profile/${username}`}>
+                                <a href={`/profile/${username}`}>
                                     <CardDescription className={cn("cursor-pointer", className)}>@{username}</CardDescription>
-                                </Link>
+                                </a>
                             )
                         }
                     })()
@@ -83,8 +83,8 @@ const ProfileCard: FC<ProfileCardProps> = (
                             <AvatarImage src={image} />
                             <AvatarFallback>{name?.at(0)?.toUpperCase()}</AvatarFallback>
                         </Avatar>
-                        <Link href={`/profile/${username}`} className="hover:underline text-lg">{name}</Link>
-                        <Link href={`/profile/${username}`} className="text-muted-foreground">@{username}</Link>
+                        <a href={`/profile/${username}`} className="hover:underline text-lg">{name}</a>
+                        <a href={`/profile/${username}`} className="text-muted-foreground">@{username}</a>
                     </CardHeader>
                     {username !== session?.user.username &&
                         <FollowButton queryKey={key} tweetId={tweetId} followed={followed} username={username} />

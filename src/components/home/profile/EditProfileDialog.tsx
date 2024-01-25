@@ -86,9 +86,9 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
                     <CardHeader className="flex flex-col gap-2 items-center">
 
                         <UploadButton
-                        appearance={{ 
-                            button:"h-full w-full bg-transparent rounded-full"
-                         }}
+                            appearance={{
+                                button: "h-full w-full bg-transparent rounded-full"
+                            }}
                             content={{
                                 button({ ready }) {
                                     if (ready) return (
@@ -100,7 +100,7 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({ name, username, bio, im
                                     return <SpinnerLoader />
                                 }
                             }}
-                            endpoint="imageUploader"
+                            endpoint="profilePicture"
                             onClientUploadComplete={(res) => {
                                 setImgUrl(res[0].url)
                                 setUploadLoading(false)

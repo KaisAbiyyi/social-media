@@ -47,15 +47,23 @@ export async function DELETE(request: Request, { params }: { params: { tweetId: 
                 id: tweetId,
             }
         })
-        await prisma.tweet.deleteMany({
+        await prisma.tweet.updateMany({
             where: {
                 quotedId: tweet?.id
+            },
+            data: {
+                quotedId: null,
+                quotedTweetDeleted: true,
             }
         })
 
-        await prisma.tweet.deleteMany({
+        await prisma.tweet.updateMany({
             where: {
                 repliedId: tweet?.id
+            },
+            data: {
+                repliedId: null,
+                repliedTweetDeleted: true
             }
         })
 

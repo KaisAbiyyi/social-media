@@ -124,30 +124,33 @@ const TweetCard: FC<TweetCardProps> = () => {
                         </div>
                     }
                     <CardFooter className="justify-between p-0 w-full">
-                        <UploadButton
-                            appearance={{
-                                allowedContent: "hidden",
-                                container: "!p-0",
-                                button: buttonVariants({ variant: "default", size: "icon", className: "rounded-full" })
-                            }}
-                            content={{
-                                button({ ready }) {
-                                    if (ready) return <Image />
-                                    return <SpinnerLoader />
-                                },
-                            }}
-                            onUploadProgress={() => setImageUploading(true)}
-                            endpoint="mediaUploader"
-                            onClientUploadComplete={(res) => {
-                                setImages(res as [])
-                                setImageUploading(false)
-                            }}
-                            onUploadError={(err: Error) => {
-                                return toast({
-                                    title: "Something went wrong",
-                                    description: err.message
-                                })
-                            }} />
+                        {images.length === 0 ?
+                            <UploadButton
+                                appearance={{
+                                    allowedContent: "hidden",
+                                    container: "!p-0",
+                                    button: buttonVariants({ variant: "default", size: "icon", className: "rounded-full" })
+                                }}
+                                content={{
+                                    button({ ready }) {
+                                        if (ready) return <Image />
+                                        return <SpinnerLoader />
+                                    },
+                                }}
+                                onUploadProgress={() => setImageUploading(true)}
+                                endpoint="mediaUploader"
+                                onClientUploadComplete={(res) => {
+                                    setImages(res as [])
+                                    setImageUploading(false)
+                                }}
+                                onUploadError={(err: Error) => {
+                                    return toast({
+                                        title: "Something went wrong",
+                                        description: err.message
+                                    })
+                                }} />
+                            : null
+                        }
                         <Button
                             disabled={text.length < 1 || isPending || imageUploading}
                             onClick={() => CreateNewPost({

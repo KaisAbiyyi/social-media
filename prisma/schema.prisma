@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Or "mysql" if you're using MySQL in Supabase
+  url      = env("DATABASE_URL") // Load from environment variables
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  username  String   @unique
+  email     String   @unique
+  password  String
+  bio       String? // Optional field for the user's bio
+  avatar    String? // Optional field for the user's avatar URL
+  createdAt DateTime @default(now())
+  tweets    Tweet[]  @relation("UserTweets")
+  likes     Like[]   @relation("UserLikes")
+
+  // Followers and following (no fields and references needed here)
+  followers Follow[] @relation("Followers")
+  following Follow[] @relation("Following")
+}
+
+model Tweet {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation("UserTweets", fields: [authorId], references: [id])
+  authorId  Int
+
+  // Self-relation for replies (a tweet can have many replies)
+  parent   Tweet?  @relation("TweetReplies", fields: [parentId], references: [id])
+  parentId Int?
+  replies  Tweet[] @relation("TweetReplies")
+
+  // Self-relation for retweets (a tweet can be a retweet of another tweet)
+  retweetOf Tweet?  @relation("Retweet", fields: [retweetId], references: [id])
+  retweetId Int?
+  retweets  Tweet[] @relation("Retweet")
+
+  likes Like[] @relation("TweetLikes")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation("UserLikes", fields: [userId], references: [id])
+  userId    Int
+  tweet     Tweet    @relation("TweetLikes", fields: [tweetId], references: [id])
+  tweetId   Int
+  createdAt DateTime @default(now())
+}
+
+model Follow {
+  id Int @id @default(autoincrement())
+
+  // Relations to users (both follower and following)
+  follower    User @relation("Followers", fields: [followerId], references: [id])
+  followerId  Int
+  following   User @relation("Following", fields: [followingId], references: [id])
+  followingId Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId]) // Ensure a unique follower/following relationship
+}

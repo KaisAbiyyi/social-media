@@ -74,11 +74,11 @@ You can start editing the pages by modifying files inside the src/app/ directory
 
 ### Fatures
 
-- *User Authentication*: Powered by NextAuth.js
-- *Tweeting*: Create, reply to, like, and retweet posts
-- *Follow/Unfollow*: Build your own network by following or unfollowing other users
-- *Real-time Updates*: Keep your feed fresh with real-time tweet updates
-- *Responsive Design*: Optimized for desktop and mobile devices
+- **User Authentication**: Powered by NextAuth.js
+- **Tweeting**: Create, reply to, like, and retweet posts
+- **Follow/Unfollow**: Build your own network by following or unfollowing other users
+- **Real-time Updates**: Keep your feed fresh with real-time tweet updates
+- **Responsive Design**: Optimized for desktop and mobile devices
 
 ### Project Structure
 
